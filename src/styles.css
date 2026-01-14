@@ -18,17 +18,17 @@
 /* Global Styles setup */
 html,
 body {
-  @apply h-full w-full bg-gray-50 text-gray-900 font-sans;
+  @apply h-full w-full bg-gray-50 font-sans text-gray-900;
   overflow-x: hidden;
 }
 
 /* CDK Drag & Drop Styles (ต้องมีเพื่อให้การลากดูดี) */
 .cdk-drag-preview {
-  @apply shadow-2xl rounded-lg bg-white opacity-90 border-2 border-brand-primary box-border cursor-grabbing;
+  @apply box-border cursor-grabbing rounded-lg border-2 border-brand-primary bg-white opacity-90 shadow-2xl;
 }
 
 .cdk-drag-placeholder {
-  @apply opacity-30 bg-gray-200 border-2 border-dashed border-gray-400 rounded-lg;
+  @apply rounded-lg border-2 border-dashed border-gray-400 bg-gray-200 opacity-30;
 }
 
 .cdk-drag-animating {

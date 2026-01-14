@@ -7,10 +7,12 @@
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
-    "serve:ssr:org-chart-app": "node dist/org-chart-app/server/server.mjs"
+    "serve:ssr:org-chart-app": "node dist/org-chart-app/server/server.mjs",
+    "upgrade": "bun update --interactive",
+    "format": "prettier --write .",
+    "clean": "rimraf node_modules package-lock.json bun.lockb bun.lock dist .angular"
   },
   "private": true,
-  "packageManager": "npm@11.6.2",
   "dependencies": {
     "@angular/common": "^21.0.0",
     "@angular/compiler": "^21.0.0",
@@ -40,6 +42,7 @@
     "jsdom": "^27.1.0",
     "prettier": "^3.7.4",
     "prettier-plugin-tailwindcss": "^0.7.2",
+    "rimraf": "^6.1.2",
     "typescript": "~5.9.2",
     "vitest": "^4.0.8"
   }
