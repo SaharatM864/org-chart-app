@@ -1,0 +1,5 @@
+// API Service handling HTTP requests
+import { Injectable } from '@angular/core';
+
+@Injectable({ providedIn: 'root' })
+export class OrgService {}

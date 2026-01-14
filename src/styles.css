@@ -1,0 +1,41 @@
+@import 'tailwindcss';
+
+@theme {
+  /* ย้าย Font */
+  --font-sans: 'Inter', 'Sarabun', sans-serif;
+
+  /* ย้าย Colors (Brand) */
+  --color-brand-primary: #6b21a8;
+  --color-brand-secondary: #d8b4fe;
+  --color-brand-accent: #f3e8ff;
+
+  /* ย้าย Colors (Status) */
+  --color-status-error: #ef4444;
+  --color-status-success: #22c55e;
+  --color-status-warning: #f59e0b;
+}
+
+/* Global Styles setup */
+html,
+body {
+  @apply h-full w-full bg-gray-50 text-gray-900 font-sans;
+  overflow-x: hidden;
+}
+
+/* CDK Drag & Drop Styles (ต้องมีเพื่อให้การลากดูดี) */
+.cdk-drag-preview {
+  @apply shadow-2xl rounded-lg bg-white opacity-90 border-2 border-brand-primary box-border cursor-grabbing;
+}
+
+.cdk-drag-placeholder {
+  @apply opacity-30 bg-gray-200 border-2 border-dashed border-gray-400 rounded-lg;
+}
+
+.cdk-drag-animating {
+  transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+}
+
+/* ซ่อน Placeholder ตอนลาก */
+.cdk-drop-list-dragging .example-box:not(.cdk-drag-placeholder) {
+  transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+}
