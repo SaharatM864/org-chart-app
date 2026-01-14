@@ -10,7 +10,7 @@
     "serve:ssr:org-chart-app": "node dist/org-chart-app/server/server.mjs",
     "upgrade": "bun update --interactive",
     "format": "prettier --write .",
-    "clean": "rimraf node_modules package-lock.json bun.lockb bun.lock dist .angular"
+    "clean": "bun scripts/clean.ts"
   },
   "private": true,
   "dependencies": {
