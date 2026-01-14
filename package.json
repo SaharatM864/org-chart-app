@@ -46,6 +46,7 @@
     "@spartan-ng/cli": "^0.0.1-alpha.603",
     "@types/express": "^5.0.1",
     "@types/node": "^20.17.19",
+    "@types/uuid": "^10.0.0",
     "jsdom": "^27.1.0",
     "prettier": "^3.7.4",
     "prettier-plugin-tailwindcss": "^0.7.2",
