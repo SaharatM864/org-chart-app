@@ -8,7 +8,8 @@
       "@core/*": ["src/app/core/*"],
       "@features/*": ["src/app/features/*"],
       "@shared/*": ["src/app/shared/*"],
-      "@env/*": ["src/environments/*"]
+      "@env/*": ["src/environments/*"],
+      "@spartan-ng/helm/*": ["libs/ui/*"]
     },
     "strict": true,
     "noImplicitOverride": true,
