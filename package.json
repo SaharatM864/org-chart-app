@@ -43,6 +43,7 @@
     "@angular/build": "^21.0.5",
     "@angular/cli": "^21.0.5",
     "@angular/compiler-cli": "^21.0.0",
+    "@nx/angular": "^22.3.3",
     "@spartan-ng/cli": "^0.0.1-alpha.603",
     "@types/express": "^5.0.1",
     "@types/node": "^20.17.19",
