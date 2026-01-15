@@ -14,7 +14,7 @@ import { WorkerNode } from '../../data-access/org.model';
   template: `
     <div
       hlmCard
-      class="group relative flex w-50 flex-col overflow-hidden border-l-4 p-3 transition-all hover:shadow-md"
+      class="group relative flex w-50 flex-col overflow-hidden border-l-4 bg-white p-3 transition-all hover:shadow-md"
       [class.border-l-primary]="!node.parentId"
       [class.border-l-secondary]="node.parentId"
       [class.ring-2]="isHighlighted"

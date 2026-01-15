@@ -10,7 +10,19 @@ import { transformToOrgChartNode } from '../../utils/org-chart-adapter';
 import { HlmButtonImports } from '@spartan-ng/helm/button';
 import { BrnDialogService } from '@spartan-ng/brain/dialog';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
-import { lucidePlus, lucideLayoutGrid } from '@ng-icons/lucide';
+import {
+  lucidePlus,
+  lucideLayoutGrid,
+  lucideMinus,
+  lucideMaximize,
+  lucideMinimize,
+  lucideMap,
+  lucideArrowRightLeft,
+  lucideChevronsDown,
+  lucideChevronsUp,
+  lucideRotateCcw,
+  lucideMove,
+} from '@ng-icons/lucide';
 // eslint-disable-next-line @nx/enforce-module-boundaries
 import {
   NgxInteractiveOrgChart,
@@ -30,7 +42,21 @@ import {
     ...HlmButtonImports,
     NgIconComponent,
   ],
-  providers: [provideIcons({ lucidePlus, lucideLayoutGrid })],
+  providers: [
+    provideIcons({
+      lucidePlus,
+      lucideLayoutGrid,
+      lucideMinus,
+      lucideMaximize,
+      lucideMinimize,
+      lucideMap,
+      lucideArrowRightLeft,
+      lucideChevronsDown,
+      lucideChevronsUp,
+      lucideRotateCcw,
+      lucideMove,
+    }),
+  ],
   template: `
     <div
       class="flex h-[calc(100vh-3.5rem)] w-full bg-background pt-14 text-foreground"
@@ -67,9 +93,64 @@ import {
       </aside>
 
       <!-- Main Chart Area -->
-      <main class="relative flex-1 overflow-hidden bg-muted/5">
-        <div class="absolute top-4 left-4 z-10 flex gap-2">
-          <button hlmBtn variant="secondary" size="sm" (click)="resetView()">Reset View</button>
+      <main class="figma-bg-dots relative flex-1 overflow-hidden">
+        <div class="absolute top-4 right-4 z-10 flex flex-col gap-2">
+          <!-- Toolbar Group -->
+          <div
+            class="flex flex-col gap-1 rounded-lg border bg-background/95 p-1 shadow-sm backdrop-blur supports-backdrop-filter:bg-background/60"
+          >
+            <button hlmBtn variant="ghost" size="icon" (click)="zoomIn()" title="Zoom In">
+              <ng-icon name="lucidePlus" size="18"></ng-icon>
+            </button>
+            <button hlmBtn variant="ghost" size="icon" (click)="zoomOut()" title="Zoom Out">
+              <ng-icon name="lucideMinus" size="18"></ng-icon>
+            </button>
+            <button hlmBtn variant="ghost" size="icon" (click)="resetView()" title="Reset View">
+              <ng-icon name="lucideRotateCcw" size="18"></ng-icon>
+            </button>
+            <div class="my-1 h-px bg-border"></div>
+            <button
+              hlmBtn
+              variant="ghost"
+              size="icon"
+              (click)="toggleDragAndDrop()"
+              [class.bg-accent]="isDraggable"
+              title="{{ isDraggable ? 'Disable Drag & Drop' : 'Enable Drag & Drop' }}"
+            >
+              <ng-icon name="lucideMove" size="18"></ng-icon>
+            </button>
+            <div class="my-1 h-px bg-border"></div>
+            <button
+              hlmBtn
+              variant="ghost"
+              size="icon"
+              (click)="switchLayout()"
+              title="Toggle Layout (Vertical/Horizontal)"
+            >
+              <ng-icon
+                name="lucideArrowRightLeft"
+                size="18"
+                [class.rotate-90]="layoutDirection === 'vertical'"
+              ></ng-icon>
+            </button>
+            <button
+              hlmBtn
+              variant="ghost"
+              size="icon"
+              (click)="toggleMiniMap()"
+              [class.bg-accent]="showMiniMap"
+              title="Toggle Mini Map"
+            >
+              <ng-icon name="lucideMap" size="18"></ng-icon>
+            </button>
+            <div class="my-1 h-px bg-border"></div>
+            <button hlmBtn variant="ghost" size="icon" (click)="expandAll()" title="Expand All">
+              <ng-icon name="lucideChevronsDown" size="18"></ng-icon>
+            </button>
+            <button hlmBtn variant="ghost" size="icon" (click)="collapseAll()" title="Collapse All">
+              <ng-icon name="lucideChevronsUp" size="18"></ng-icon>
+            </button>
+          </div>
         </div>
 
         <ng-container *ngIf="chartData() as rootNode; else noData">
@@ -78,7 +159,10 @@ import {
             class="block h-full w-full"
             [data]="rootNode"
             [themeOptions]="themeOptions"
-            [draggable]="true"
+            [draggable]="isDraggable"
+            [layout]="layoutDirection"
+            [showMiniMap]="showMiniMap"
+            miniMapPosition="bottom-right"
             [canDragNode]="canDragNode"
             [canDropNode]="canDropNode"
             (nodeDrop)="onNodeDrop($event)"
@@ -113,6 +197,11 @@ import {
         display: block;
         height: 100%;
       }
+      .figma-bg-dots {
+        background-color: #f5f5f5;
+        background-image: radial-gradient(#e5e7eb 1px, transparent 1px);
+        background-size: 20px 20px;
+      }
     `,
   ],
 })
@@ -142,6 +231,11 @@ export class ChartViewComponent {
       activeColor: '#3b82f6', // primary
     },
   };
+
+  // View State
+  layoutDirection: 'vertical' | 'horizontal' = 'vertical';
+  showMiniMap = false;
+  isDraggable = true;
 
   ngOnInit() {
     this.store.loadChart();
@@ -205,12 +299,49 @@ export class ChartViewComponent {
   }
 
   resetView() {
-    // Access private method or public if available?
-    // The user guide says: this.orgChart.resetPanAndZoom();
-    // We need to CAST or trust the typing.
     if (this.orgChart) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (this.orgChart as any).resetPanAndZoom();
     }
+  }
+
+  zoomIn() {
+    if (this.orgChart) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (this.orgChart as any).zoomIn();
+    }
+  }
+
+  zoomOut() {
+    if (this.orgChart) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (this.orgChart as any).zoomOut();
+    }
+  }
+
+  switchLayout() {
+    this.layoutDirection = this.layoutDirection === 'vertical' ? 'horizontal' : 'vertical';
+  }
+
+  toggleMiniMap() {
+    this.showMiniMap = !this.showMiniMap;
+  }
+
+  expandAll() {
+    if (this.orgChart) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (this.orgChart as any).toggleCollapseAll(false);
+    }
+  }
+
+  collapseAll() {
+    if (this.orgChart) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (this.orgChart as any).toggleCollapseAll(true);
+    }
+  }
+
+  toggleDragAndDrop() {
+    this.isDraggable = !this.isDraggable;
   }
 }
