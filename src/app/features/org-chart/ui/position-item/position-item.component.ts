@@ -14,7 +14,7 @@ import { lucideGripVertical } from '@ng-icons/lucide';
   template: `
     <div
       hlmCard
-      class="bg-card flex cursor-grab items-center gap-2 rounded-lg border border-border p-3 shadow-sm hover:border-primary/50 hover:shadow-md active:cursor-grabbing"
+      class="bg-card flex cursor-grab flex-row items-center gap-3 rounded-lg border border-border p-3 shadow-sm hover:border-primary/50 hover:shadow-md active:cursor-grabbing"
     >
       <ng-icon name="lucideGripVertical" class="text-muted-foreground"></ng-icon>
       <div class="flex flex-col">

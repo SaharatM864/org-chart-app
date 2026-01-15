@@ -58,10 +58,7 @@ import {
     }),
   ],
   template: `
-    <div
-      class="flex h-[calc(100vh-3.5rem)] w-full bg-background pt-14 text-foreground"
-      cdkDropListGroup
-    >
+    <div class="flex h-full w-full bg-background text-foreground" cdkDropListGroup>
       <!-- Sidebar / Position List -->
       <aside class="bg-card flex w-80 flex-col gap-4 overflow-y-auto border-r border-border p-4">
         <div class="flex items-center justify-between">

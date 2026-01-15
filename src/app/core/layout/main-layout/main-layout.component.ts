@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { RouterOutlet, RouterLink } from '@angular/router';
+import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
 import { provideIcons } from '@ng-icons/core';
 import {
   lucideLayoutDashboard,
@@ -23,6 +23,7 @@ import { LanguageSwitcherComponent } from '../../../shared/ui/language-switcher/
   imports: [
     RouterOutlet,
     RouterLink,
+    RouterLinkActive,
     ...HlmNavigationMenuImports,
     ...BrnNavigationMenuImports,
     ...HlmIconImports,

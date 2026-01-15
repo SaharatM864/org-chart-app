@@ -1,4 +1,4 @@
-<div class="flex min-h-screen flex-col bg-background">
+<div class="flex h-screen w-screen flex-col overflow-hidden bg-background">
   <header class="fixed top-0 z-50 w-full border-b border-border bg-background/80 backdrop-blur-md">
     <div class="container flex h-14 items-center px-4">
       <nav hlmNavigationMenu class="mx-6 flex items-center space-x-4 lg:space-x-6">
@@ -7,7 +7,10 @@
             <a
               hlmNavigationMenuLink
               routerLink="/org-chart"
-              class="group inline-flex h-9 w-max items-center justify-center rounded-md bg-transparent px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-accent focus:bg-accent focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-active:bg-accent/50 data-[state=open]:bg-accent/50"
+              routerLinkActive
+              #orgChartActive="routerLinkActive"
+              [attr.data-active]="orgChartActive.isActive ? '' : null"
+              class="group inline-flex h-9 w-max items-center justify-center rounded-md px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-accent focus:bg-accent focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-active:bg-accent"
             >
               Org Chart
             </a>
@@ -29,7 +32,7 @@
     </div>
   </header>
 
-  <main class="flex-1">
+  <main class="flex-1 pt-14">
     <router-outlet />
   </main>
 </div>
