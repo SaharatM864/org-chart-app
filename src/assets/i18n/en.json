@@ -1,0 +1,12 @@
+{
+  "NAV": {
+    "ORG_CHART": "Org Chart",
+    "DASHBOARD": "Dashboard",
+    "SETTINGS": "Settings"
+  },
+  "COMMON": {
+    "LANGUAGE": "Language",
+    "SWITCH_LANG": "Switch Language",
+    "HELLO": "Hello"
+  }
+}

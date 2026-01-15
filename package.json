@@ -27,6 +27,8 @@
     "@ng-icons/core": ">=32.0.0 <34.0.0",
     "@ng-icons/lucide": ">=32.0.0 <34.0.0",
     "@ngrx/signals": "^21.0.1",
+    "@ngx-translate/core": "^17.0.0",
+    "@ngx-translate/http-loader": "^17.0.0",
     "@spartan-ng/brain": "^0.0.1-alpha.603",
     "@tailwindcss/postcss": "^4.1.18",
     "class-variance-authority": "^0.7.0",

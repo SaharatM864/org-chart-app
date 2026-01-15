@@ -1,0 +1,12 @@
+{
+  "NAV": {
+    "ORG_CHART": "ผังองค์กร",
+    "DASHBOARD": "แดชบอร์ด",
+    "SETTINGS": "ตั้งค่า"
+  },
+  "COMMON": {
+    "LANGUAGE": "ภาษา",
+    "SWITCH_LANG": "เปลี่ยนภาษา",
+    "HELLO": "สวัสดี"
+  }
+}

@@ -102,14 +102,14 @@ import type { ClassValue } from 'clsx';
             <div class="flex items-center space-x-1">
               <button
                 brnCalendarPreviousButton
-                class="absolute left-1 inline-flex size-8 items-center justify-center rounded-md bg-transparent p-0 text-sm font-medium whitespace-nowrap text-popover-foreground transition-colors hover:bg-accent hover:text-accent-foreground hover:opacity-100 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50"
+                class="text-popover-foreground absolute left-1 inline-flex size-8 items-center justify-center rounded-md bg-transparent p-0 text-sm font-medium whitespace-nowrap transition-colors hover:bg-accent hover:text-accent-foreground hover:opacity-100 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50"
               >
                 <ng-icon hlm name="lucideChevronLeft" size="sm" />
               </button>
 
               <button
                 brnCalendarNextButton
-                class="absolute right-1 inline-flex size-8 items-center justify-center rounded-md bg-transparent p-0 text-sm font-medium whitespace-nowrap text-popover-foreground transition-colors hover:bg-accent hover:text-accent-foreground hover:opacity-100 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50"
+                class="text-popover-foreground absolute right-1 inline-flex size-8 items-center justify-center rounded-md bg-transparent p-0 text-sm font-medium whitespace-nowrap transition-colors hover:bg-accent hover:text-accent-foreground hover:opacity-100 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50"
               >
                 <ng-icon hlm name="lucideChevronRight" size="sm" />
               </button>
