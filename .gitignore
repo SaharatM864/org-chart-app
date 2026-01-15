@@ -43,3 +43,6 @@ __screenshots__/
 Thumbs.db
 
 .angular
+.nx/
+.nx/workspace-data/
+.nx/cache/

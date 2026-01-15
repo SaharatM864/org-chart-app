@@ -8,14 +8,10 @@ export const routes: Routes = [
     children: [
       {
         path: '',
-        redirectTo: 'dashboard',
+        redirectTo: 'org-chart',
         pathMatch: 'full',
       },
-      {
-        path: 'dashboard',
-        loadComponent: () =>
-          import('./features/dashboard/dashboard.component').then((m) => m.DashboardComponent),
-      },
+      // Dashboard route removed
       {
         path: 'org-chart',
         loadChildren: () =>

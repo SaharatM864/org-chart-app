@@ -1,46 +1,55 @@
 import { Component } from '@angular/core';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-chart-view',
   standalone: true,
+  imports: [CommonModule],
   template: `
-    <div class="flex h-full flex-col">
-      <div class="mb-4 flex items-center justify-between space-y-2">
-        <h2 class="text-3xl font-bold tracking-tight">Organization Chart</h2>
-        <div class="flex items-center space-x-2">
-          <!-- Toolbar placeholders -->
-          <button
-            class="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
-          >
-            Add Node
-          </button>
-          <button
-            class="rounded-md bg-secondary px-4 py-2 text-sm font-medium text-secondary-foreground hover:bg-secondary/80"
-          >
-            Export
-          </button>
-        </div>
-      </div>
-
-      <!-- Canvas Area -->
+    <div
+      class="relative min-h-[150vh] w-full bg-linear-to-br from-indigo-500 via-purple-500 to-pink-500 p-8 text-white"
+    >
       <div
-        class="group relative flex-1 overflow-hidden rounded-xl border border-dashed bg-muted/30"
-      >
-        <!-- Dot Grid Background -->
-        <div
-          class="pointer-events-none absolute inset-0 [mask-image:linear-gradient(to_bottom,transparent,black)]"
-        >
+        class="animate-blob fixed top-20 left-10 h-32 w-32 rounded-full bg-yellow-400 opacity-70 mix-blend-multiply blur-xl filter"
+      ></div>
+      <div
+        class="animate-blob animation-delay-2000 fixed top-20 right-10 h-32 w-32 rounded-full bg-pink-400 opacity-70 mix-blend-multiply blur-xl filter"
+      ></div>
+
+      <div class="mx-auto max-w-4xl space-y-8 pt-10">
+        <div class="space-y-4">
+          <h1 class="text-5xl font-bold">Glass Navbar Test</h1>
+          <p class="text-xl opacity-90">
+            Tailwind v4 is working correctly! Scroll down to see the blur effect on the navbar.
+          </p>
           <div
-            class="absolute inset-0 bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [mask-image:radial-gradient(ellipse_50%_50%_at_50%_50%,#000_70%,transparent_100%)] [background-size:16px_16px]"
-          ></div>
+            class="inline-block rounded-lg border border-white/20 bg-black/20 p-4 backdrop-blur-sm"
+          >
+            Verified: defaults to "org-chart" route
+          </div>
         </div>
 
-        <div class="absolute inset-0 flex items-center justify-center">
-          <div class="max-w-sm rounded-lg border bg-background p-6 text-center shadow-lg">
-            <h3 class="mb-2 text-lg font-semibold">Interactive Chart</h3>
-            <p class="text-sm text-muted-foreground">
-              Drag and drop functionality will be implemented here.
-            </p>
+        <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
+          <div
+            class="h-64 rounded-2xl border border-white/20 bg-white/10 p-6 shadow-xl backdrop-blur-md"
+          >
+            <h3 class="mb-2 text-xl font-bold">Card 1</h3>
+            <p class="opacity-80">This card also uses glassmorphism.</p>
+          </div>
+          <div
+            class="h-64 rounded-2xl border border-white/20 bg-white/10 p-6 shadow-xl backdrop-blur-md"
+          >
+            <h3 class="mb-2 text-xl font-bold">Card 2</h3>
+            <p class="opacity-80">Scroll up and down to check the sticky header blur.</p>
+          </div>
+        </div>
+
+        <div class="space-y-4">
+          <div
+            *ngFor="let i of [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]"
+            class="flex h-24 items-center rounded-lg border border-white/10 bg-white/5 px-6"
+          >
+            Scroll Item {{ i }}
           </div>
         </div>
       </div>
