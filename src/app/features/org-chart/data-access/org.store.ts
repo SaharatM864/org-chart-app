@@ -16,6 +16,7 @@ const initialState: OrgState = {
   ],
   isLoading: false,
   error: null,
+  highlightedNodeId: null,
 };
 
 export const OrgStore = signalStore(
@@ -23,29 +24,77 @@ export const OrgStore = signalStore(
   withState(initialState),
   withComputed((store) => ({
     viewTree: computed(() => {
-      const buildTree = (nodeId: string): any => {
+      interface TreeNode extends WorkerNode {
+        children: TreeNode[];
+      }
+      const buildTree = (nodeId: string): TreeNode | null => {
         const node = store.nodeMap()[nodeId];
         if (!node) return null;
         return {
           ...node,
-          children: node.childrenIds.map((id) => buildTree(id)).filter((n) => n !== null),
+          children: node.childrenIds
+            .map((id) => buildTree(id))
+            .filter((n): n is TreeNode => n !== null),
         };
       };
       return store
         .rootIds()
         .map((id) => buildTree(id))
-        .filter((n) => n !== null);
+        .filter((n): n is TreeNode => n !== null);
     }),
     allDropListIds: computed(() => Object.keys(store.nodeMap())),
+    nodesByLevel: computed(() => {
+      const map = store.nodeMap();
+      const result: Record<number, WorkerNode[]> = {};
+      Object.values(map).forEach((node) => {
+        if (!result[node.level]) {
+          result[node.level] = [];
+        }
+        result[node.level].push(node);
+      });
+      return result;
+    }),
+    highlightedIds: computed(() => {
+      const id = store.highlightedNodeId();
+      if (!id) return new Set<string>();
+
+      const map = store.nodeMap();
+      const set = new Set<string>();
+      set.add(id);
+
+      // Traverse Up (Parents)
+      let curr = map[id];
+      while (curr && curr.parentId) {
+        set.add(curr.parentId);
+        curr = map[curr.parentId];
+      }
+
+      // Traverse Down (Children) - Recursive
+      const addChildren = (nodeId: string) => {
+        const node = map[nodeId];
+        if (node) {
+          node.childrenIds.forEach((childId) => {
+            set.add(childId);
+            addChildren(childId);
+          });
+        }
+      };
+      addChildren(id);
+
+      return set;
+    }),
   })),
   withMethods((store, orgService = inject(OrgService)) => ({
+    setHighlight: (nodeId: string | null) => {
+      patchState(store, { highlightedNodeId: nodeId });
+    },
     loadChart: () => {
       patchState(store, { isLoading: true });
       orgService.getOrgChart().subscribe({
         next: (data) => {
           patchState(store, {
-            nodeMap: data.nodeMap,
-            rootIds: data.rootIds,
+            nodeMap: data.nodeMap || {}, // Safety check
+            rootIds: data.rootIds || [],
             isLoading: false,
           });
         },
@@ -58,6 +107,9 @@ export const OrgStore = signalStore(
       const newNode: WorkerNode = {
         id: newNodeId,
         name: position.name,
+        nameTh: position.nameTh,
+        nameZh: position.nameZh,
+        nameVi: position.nameVi,
         parentId,
         childrenIds: [],
         level: parentId ? store.nodeMap()[parentId].level + 1 : 1,
@@ -71,7 +123,7 @@ export const OrgStore = signalStore(
           ...state.nodeMap,
           [newNodeId]: newNode,
         };
-        let updatedRootIds = [...state.rootIds];
+        const updatedRootIds = [...state.rootIds];
 
         if (parentId) {
           const parent = updatedNodeMap[parentId];
@@ -216,6 +268,20 @@ export const OrgStore = signalStore(
 
         return { nodeMap: updatedNodeMap, rootIds: updatedRootIds };
       });
+    },
+
+    addSidebarPosition: (position: Omit<PositionItem, 'id' | 'code'> & { code?: string }) => {
+      const newPos: PositionItem = {
+        id: uuidv4(),
+        name: position.name,
+        nameTh: position.nameTh,
+        nameZh: position.nameZh,
+        nameVi: position.nameVi,
+        code: position.code || `POS-${Math.floor(Math.random() * 1000)}`,
+      };
+      patchState(store, (state) => ({
+        sidebarPositions: [...state.sidebarPositions, newPos],
+      }));
     },
   })),
 );

@@ -36,6 +36,7 @@
     "embla-carousel-angular": "^20.0.0",
     "express": "^5.1.0",
     "lucide-angular": "^0.562.0",
+    "ngx-interactive-org-chart": "^1.4.0",
     "ngx-sonner": ">=3.0.0",
     "postcss": "^8.5.6",
     "rxjs": "~7.8.0",

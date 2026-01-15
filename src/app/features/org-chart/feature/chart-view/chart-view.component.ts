@@ -1,59 +1,216 @@
-import { Component } from '@angular/core';
+import { Component, computed, inject, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { DragDropModule } from '@angular/cdk/drag-drop';
+import { OrgStore } from '../../data-access/org.store';
+import { PositionItemComponent } from '../../ui/position-item/position-item.component';
+import { CreatePositionDialogComponent } from '../../ui/dialogs/create-position-dialog.component';
+import { ConfirmDeleteDialogComponent } from '../../ui/dialogs/confirm-delete-dialog.component';
+import { NodeCardComponent } from '../../ui/node-card/node-card.component';
+import { transformToOrgChartNode } from '../../utils/org-chart-adapter';
+import { HlmButtonImports } from '@spartan-ng/helm/button';
+import { BrnDialogService } from '@spartan-ng/brain/dialog';
+import { NgIconComponent, provideIcons } from '@ng-icons/core';
+import { lucidePlus, lucideLayoutGrid } from '@ng-icons/lucide';
+// eslint-disable-next-line @nx/enforce-module-boundaries
+import {
+  NgxInteractiveOrgChart,
+  OrgChartNode,
+  NgxInteractiveOrgChartTheme,
+} from 'ngx-interactive-org-chart';
 
 @Component({
   selector: 'app-chart-view',
   standalone: true,
-  imports: [CommonModule],
+  imports: [
+    CommonModule,
+    DragDropModule,
+    PositionItemComponent,
+    NodeCardComponent,
+    NgxInteractiveOrgChart,
+    ...HlmButtonImports,
+    NgIconComponent,
+  ],
+  providers: [provideIcons({ lucidePlus, lucideLayoutGrid })],
   template: `
     <div
-      class="relative min-h-[150vh] w-full bg-linear-to-br from-indigo-500 via-purple-500 to-pink-500 p-8 text-white"
+      class="flex h-[calc(100vh-3.5rem)] w-full bg-background pt-14 text-foreground"
+      cdkDropListGroup
     >
-      <div
-        class="animate-blob fixed top-20 left-10 h-32 w-32 rounded-full bg-yellow-400 opacity-70 mix-blend-multiply blur-xl filter"
-      ></div>
-      <div
-        class="animate-blob animation-delay-2000 fixed top-20 right-10 h-32 w-32 rounded-full bg-pink-400 opacity-70 mix-blend-multiply blur-xl filter"
-      ></div>
-
-      <div class="mx-auto max-w-4xl space-y-8 pt-10">
-        <div class="space-y-4">
-          <h1 class="text-5xl font-bold">Glass Navbar Test</h1>
-          <p class="text-xl opacity-90">
-            Tailwind v4 is working correctly! Scroll down to see the blur effect on the navbar.
-          </p>
-          <div
-            class="inline-block rounded-lg border border-white/20 bg-black/20 p-4 backdrop-blur-sm"
-          >
-            Verified: defaults to "org-chart" route
-          </div>
+      <!-- Sidebar / Position List -->
+      <aside class="bg-card flex w-80 flex-col gap-4 overflow-y-auto border-r border-border p-4">
+        <div class="flex items-center justify-between">
+          <h2 class="flex items-center gap-2 text-xl font-bold">
+            <ng-icon name="lucideLayoutGrid"></ng-icon>
+            Positions
+          </h2>
+          <button hlmBtn variant="outline" size="sm" (click)="openCreatePositionDialog()">
+            <ng-icon name="lucidePlus" size="16"></ng-icon>
+          </button>
         </div>
 
-        <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
-          <div
-            class="h-64 rounded-2xl border border-white/20 bg-white/10 p-6 shadow-xl backdrop-blur-md"
-          >
-            <h3 class="mb-2 text-xl font-bold">Card 1</h3>
-            <p class="opacity-80">This card also uses glassmorphism.</p>
-          </div>
-          <div
-            class="h-64 rounded-2xl border border-white/20 bg-white/10 p-6 shadow-xl backdrop-blur-md"
-          >
-            <h3 class="mb-2 text-xl font-bold">Card 2</h3>
-            <p class="opacity-80">Scroll up and down to check the sticky header blur.</p>
-          </div>
+        <p class="text-xs text-muted-foreground">
+          Drag positions from here to add new nodes (Upcoming feature).
+        </p>
+
+        <div
+          cdkDropList
+          [cdkDropListData]="store.sidebarPositions()"
+          class="flex min-h-25 flex-col gap-2"
+        >
+          <app-position-item
+            *ngFor="let item of store.sidebarPositions()"
+            [item]="item"
+            cdkDrag
+            [cdkDragData]="item"
+          ></app-position-item>
+        </div>
+      </aside>
+
+      <!-- Main Chart Area -->
+      <main class="relative flex-1 overflow-hidden bg-muted/5">
+        <div class="absolute top-4 left-4 z-10 flex gap-2">
+          <button hlmBtn variant="secondary" size="sm" (click)="resetView()">Reset View</button>
         </div>
 
-        <div class="space-y-4">
-          <div
-            *ngFor="let i of [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]"
-            class="flex h-24 items-center rounded-lg border border-white/10 bg-white/5 px-6"
+        <ng-container *ngIf="chartData() as rootNode; else noData">
+          <ngx-interactive-org-chart
+            #orgChart
+            class="block h-full w-full"
+            [data]="rootNode"
+            [themeOptions]="themeOptions"
+            [draggable]="true"
+            [canDragNode]="canDragNode"
+            [canDropNode]="canDropNode"
+            (nodeDrop)="onNodeDrop($event)"
           >
-            Scroll Item {{ i }}
+            <ng-template #nodeTemplate let-node>
+              <app-node-card
+                [node]="node.data"
+                [isHighlighted]="store.highlightedIds().has(node.id)"
+                (delete)="onDeleteNode($event)"
+                (highlight)="store.setHighlight($event)"
+                (unhighlight)="store.setHighlight(null)"
+              >
+              </app-node-card>
+            </ng-template>
+          </ngx-interactive-org-chart>
+        </ng-container>
+
+        <ng-template #noData>
+          <div class="flex h-full w-full items-center justify-center text-muted-foreground">
+            <div class="text-center">
+              <p class="text-lg font-medium">No Organization Data</p>
+              <p class="text-sm">Create a root node or import data to get started.</p>
+            </div>
           </div>
-        </div>
-      </div>
+        </ng-template>
+      </main>
     </div>
   `,
+  styles: [
+    `
+      :host {
+        display: block;
+        height: 100%;
+      }
+    `,
+  ],
 })
-export class ChartViewComponent {}
+export class ChartViewComponent {
+  readonly store = inject(OrgStore);
+  private readonly _dialogService = inject(BrnDialogService);
+
+  @ViewChild('orgChart') orgChart?: NgxInteractiveOrgChart<OrgChartNode>;
+
+  // Transform store data to OrgChartNode structure
+  // We assume single root for now. If multiple, we might need a virtual root or handle logic differently.
+  chartData = computed(() => {
+    const nodes = transformToOrgChartNode(this.store.nodeMap(), this.store.rootIds());
+    return nodes.length > 0 ? nodes[0] : null;
+  });
+
+  themeOptions: NgxInteractiveOrgChartTheme = {
+    node: {
+      background: 'transparent', // We use custom card with its own background
+      shadow: 'none',
+      borderRadius: '0',
+      outlineColor: 'transparent',
+      padding: '0',
+    },
+    connector: {
+      color: '#e2e8f0', // border-border
+      activeColor: '#3b82f6', // primary
+    },
+  };
+
+  ngOnInit() {
+    this.store.loadChart();
+  }
+
+  // Library specific checks
+  canDragNode = () => true;
+  canDropNode = () => true;
+
+  // Handle drop event from the library
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  onNodeDrop(event: any) {
+    // event: { draggedNode: OrgChartNode, targetNode: OrgChartNode }
+    // We map this back to our store action
+    if (event.draggedNode && event.targetNode) {
+      this.store.moveNode({
+        nodeId: event.draggedNode.id,
+        newParentId: event.targetNode.id,
+        newIndex: 0, // Logic for index might need refinement if order matters, but for now append to start or end
+      });
+    }
+  }
+
+  openCreatePositionDialog() {
+    const dialogRef = this._dialogService.open(CreatePositionDialogComponent);
+
+    dialogRef.closed$.subscribe((result) => {
+      if (result) {
+        this.store.addSidebarPosition({
+          name: result.name,
+          code: result.section,
+        });
+      }
+    });
+  }
+
+  onDeleteNode(nodeId: string) {
+    const node = this.store.nodeMap()[nodeId];
+    if (!node) return;
+
+    const hasChildren = node.childrenIds.length > 0;
+
+    const dialogOptions = {
+      context: { hasChildren, childrenCount: node.childrenIds.length },
+    };
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const dialogRef = this._dialogService.open(ConfirmDeleteDialogComponent, dialogOptions as any);
+
+    dialogRef.closed$.subscribe((action) => {
+      if (!action) return;
+
+      if (action === 'delete') {
+        this.store.deleteNode(nodeId, false);
+      } else if (action === 'cascade') {
+        this.store.deleteNode(nodeId, false);
+      } else if (action === 'reparent') {
+        this.store.deleteNode(nodeId, true);
+      }
+    });
+  }
+
+  resetView() {
+    // Access private method or public if available?
+    // The user guide says: this.orgChart.resetPanAndZoom();
+    // We need to CAST or trust the typing.
+    if (this.orgChart) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (this.orgChart as any).resetPanAndZoom();
+    }
+  }
+}

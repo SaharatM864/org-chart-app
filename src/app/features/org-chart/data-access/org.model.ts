@@ -17,6 +17,9 @@ export interface WorkerNode {
 export interface PositionItem {
   id: string;
   name: string;
+  nameTh?: string;
+  nameZh?: string;
+  nameVi?: string;
   code: string;
 }
 
@@ -26,6 +29,7 @@ export interface OrgState {
   sidebarPositions: PositionItem[];
   isLoading: boolean;
   error: string | null;
+  highlightedNodeId: string | null;
 }
 
 export interface MoveNodePayload {
