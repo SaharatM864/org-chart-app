@@ -283,5 +283,22 @@ export const OrgStore = signalStore(
         sidebarPositions: [...state.sidebarPositions, newPos],
       }));
     },
+
+    updateSidebarPosition: (id: string, position: Partial<PositionItem>) => {
+      patchState(store, (state) => ({
+        sidebarPositions: state.sidebarPositions.map((p) =>
+          p.id === id ? { ...p, ...position } : p,
+        ),
+      }));
+    },
+
+    reorderSidebarPositions: (previousIndex: number, currentIndex: number) => {
+      patchState(store, (state) => {
+        const positions = [...state.sidebarPositions];
+        const [movedItem] = positions.splice(previousIndex, 1);
+        positions.splice(currentIndex, 0, movedItem);
+        return { sidebarPositions: positions };
+      });
+    },
   })),
 );

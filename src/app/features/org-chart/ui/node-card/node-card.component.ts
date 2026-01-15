@@ -1,19 +1,22 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { DragDropModule, CdkDragDrop } from '@angular/cdk/drag-drop';
 import { HlmCardImports } from '@spartan-ng/helm/card';
 import { HlmButtonImports } from '@spartan-ng/helm/button';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
 import { lucideX, lucideUser } from '@ng-icons/lucide';
-import { WorkerNode } from '../../data-access/org.model';
+import { PositionItem, WorkerNode } from '../../data-access/org.model';
 
 @Component({
   selector: 'app-node-card',
   standalone: true,
-  imports: [CommonModule, ...HlmCardImports, ...HlmButtonImports, NgIconComponent],
+  imports: [CommonModule, DragDropModule, ...HlmCardImports, ...HlmButtonImports, NgIconComponent],
   providers: [provideIcons({ lucideX, lucideUser })],
   template: `
     <div
       hlmCard
+      cdkDropList
+      (cdkDropListDropped)="onCdkDrop($event)"
       class="group relative flex w-50 flex-col overflow-hidden border-l-4 bg-white p-3 transition-all hover:shadow-md"
       [class.border-l-primary]="!node.parentId"
       [class.border-l-secondary]="node.parentId"
@@ -71,6 +74,7 @@ export class NodeCardComponent {
   @Output() delete = new EventEmitter<string>();
   @Output() highlight = new EventEmitter<string>();
   @Output() unhighlight = new EventEmitter<void>();
+  @Output() incomingNodeDrop = new EventEmitter<PositionItem>();
 
   onDelete(event: Event) {
     event.stopPropagation(); // Prevent drag start if clicking delete
@@ -83,5 +87,15 @@ export class NodeCardComponent {
 
   onMouseLeave() {
     this.unhighlight.emit();
+  }
+
+  // Handle drop from Sidebar (Connected via cdkDropListGroup in parent)
+  // We use CDK instead of Native Drag to avoid conflicts with the library's internal behavior.
+  onCdkDrop(event: CdkDragDrop<PositionItem>) {
+    // Only handle if item data is available (from Sidebar)
+    if (event.item.data) {
+      console.log('CDK Drop on Node:', this.node.name, 'Data:', event.item.data);
+      this.incomingNodeDrop.emit(event.item.data);
+    }
   }
 }

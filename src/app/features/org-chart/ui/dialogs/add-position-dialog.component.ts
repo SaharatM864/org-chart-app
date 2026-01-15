@@ -1,16 +1,33 @@
-import { Component, inject } from '@angular/core';
+import { Component, EventEmitter, Output, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { BrnDialogRef } from '@spartan-ng/brain/dialog';
-import { HlmDialogImports } from '@spartan-ng/helm/dialog';
+import {
+  HlmDialogContent,
+  HlmDialogDescription,
+  HlmDialogFooter,
+  HlmDialogHeader,
+  HlmDialogTitle,
+} from '@spartan-ng/helm/dialog';
 import { HlmInput } from '@spartan-ng/helm/input';
 import { HlmButton } from '@spartan-ng/helm/button';
 import { HlmLabel } from '@spartan-ng/helm/label';
+import { PositionFormData } from '../../data-access/org.model';
 
 @Component({
-  selector: 'app-create-position-dialog',
+  selector: 'app-add-position-dialog',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, ...HlmDialogImports, HlmInput, HlmButton, HlmLabel],
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    HlmDialogContent,
+    HlmDialogHeader,
+    HlmDialogFooter,
+    HlmDialogTitle,
+    HlmDialogDescription,
+    HlmInput,
+    HlmButton,
+    HlmLabel,
+  ],
   template: `
     <hlm-dialog-content class="sm:max-w-125">
       <hlm-dialog-header>
@@ -63,18 +80,20 @@ import { HlmLabel } from '@spartan-ng/helm/label';
             </select>
           </div>
         </div>
-      </form>
 
-      <hlm-dialog-footer>
-        <button hlmBtn variant="outline" (click)="close()">Cancel</button>
-        <button hlmBtn (click)="onSubmit()" [disabled]="form.invalid">Create</button>
-      </hlm-dialog-footer>
+        <hlm-dialog-footer>
+          <button type="button" hlmBtn variant="outline" (click)="onClose()">Cancel</button>
+          <button type="submit" hlmBtn [disabled]="form.invalid">Create</button>
+        </hlm-dialog-footer>
+      </form>
     </hlm-dialog-content>
   `,
 })
-export class CreatePositionDialogComponent {
-  private readonly _dialogRef = inject(BrnDialogRef);
+export class AddPositionDialogComponent {
   private fb = inject(FormBuilder);
+
+  @Output() formSubmit = new EventEmitter<PositionFormData>();
+  @Output() cancel = new EventEmitter<void>();
 
   form = this.fb.group({
     name: ['', Validators.required],
@@ -87,11 +106,12 @@ export class CreatePositionDialogComponent {
 
   onSubmit() {
     if (this.form.valid) {
-      this._dialogRef.close(this.form.value);
+      this.formSubmit.emit(this.form.value as unknown as PositionFormData);
+      this.form.reset({ section: 'General', salaryType: 'Normal' });
     }
   }
 
-  close() {
-    this._dialogRef.close();
+  onClose() {
+    this.cancel.emit();
   }
 }

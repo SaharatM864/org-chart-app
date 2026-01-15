@@ -1,14 +1,16 @@
 import { Component, computed, inject, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { DragDropModule } from '@angular/cdk/drag-drop';
+import { CdkDragDrop, DragDropModule } from '@angular/cdk/drag-drop';
+import { BrnDialogContent } from '@spartan-ng/brain/dialog';
 import { OrgStore } from '../../data-access/org.store';
 import { PositionItemComponent } from '../../ui/position-item/position-item.component';
-import { CreatePositionDialogComponent } from '../../ui/dialogs/create-position-dialog.component';
+import { AddPositionDialogComponent } from '../../ui/dialogs/add-position-dialog.component';
+import { EditPositionDialogComponent } from '../../ui/dialogs/edit-position-dialog.component';
 import { ConfirmDeleteDialogComponent } from '../../ui/dialogs/confirm-delete-dialog.component';
 import { NodeCardComponent } from '../../ui/node-card/node-card.component';
 import { transformToOrgChartNode } from '../../utils/org-chart-adapter';
-import { HlmButtonImports } from '@spartan-ng/helm/button';
-import { BrnDialogService } from '@spartan-ng/brain/dialog';
+import { HlmButton } from '@spartan-ng/helm/button';
+import { HlmDialog, HlmDialogService } from '@spartan-ng/helm/dialog';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
 import {
   lucidePlus,
@@ -29,6 +31,7 @@ import {
   OrgChartNode,
   NgxInteractiveOrgChartTheme,
 } from 'ngx-interactive-org-chart';
+import { PositionFormData, PositionItem, WorkerNode } from '../../data-access/org.model';
 
 @Component({
   selector: 'app-chart-view',
@@ -39,10 +42,15 @@ import {
     PositionItemComponent,
     NodeCardComponent,
     NgxInteractiveOrgChart,
-    ...HlmButtonImports,
+    HlmButton,
     NgIconComponent,
+    BrnDialogContent,
+    HlmDialog,
+    AddPositionDialogComponent,
+    EditPositionDialogComponent,
   ],
   providers: [
+    HlmDialogService,
     provideIcons({
       lucidePlus,
       lucideLayoutGrid,
@@ -58,6 +66,10 @@ import {
     }),
   ],
   template: `
+    <!-- 
+      Using cdkDropListGroup to automatically connect 
+      Sidebar (Source) -> NodeCards (Targets) 
+    -->
     <div class="flex h-full w-full bg-background text-foreground" cdkDropListGroup>
       <!-- Sidebar / Position List -->
       <aside class="bg-card flex w-80 flex-col gap-4 overflow-y-auto border-r border-border p-4">
@@ -66,25 +78,25 @@ import {
             <ng-icon name="lucideLayoutGrid"></ng-icon>
             Positions
           </h2>
-          <button hlmBtn variant="outline" size="sm" (click)="openCreatePositionDialog()">
+          <button hlmBtn variant="outline" size="sm" (click)="openAddPositionDialog()">
             <ng-icon name="lucidePlus" size="16"></ng-icon>
           </button>
         </div>
 
-        <p class="text-xs text-muted-foreground">
-          Drag positions from here to add new nodes (Upcoming feature).
-        </p>
+        <p class="text-xs text-muted-foreground">Drag positions from here to add new nodes.</p>
 
         <div
           cdkDropList
           [cdkDropListData]="store.sidebarPositions()"
           class="flex min-h-25 flex-col gap-2"
+          (cdkDropListDropped)="onSidebarDrop($event)"
         >
           <app-position-item
             *ngFor="let item of store.sidebarPositions()"
             [item]="item"
             cdkDrag
             [cdkDragData]="item"
+            (edit)="openEditPositionDialog($event)"
           ></app-position-item>
         </div>
       </aside>
@@ -171,6 +183,7 @@ import {
                 (delete)="onDeleteNode($event)"
                 (highlight)="store.setHighlight($event)"
                 (unhighlight)="store.setHighlight(null)"
+                (incomingNodeDrop)="onDropFromSidebar($event, node.data)"
               >
               </app-node-card>
             </ng-template>
@@ -187,6 +200,29 @@ import {
         </ng-template>
       </main>
     </div>
+
+    <!-- Dialogs -->
+
+    <!-- Add Position Dialog -->
+    <hlm-dialog [state]="addDialogState" (closed)="closeAddPositionDialog()">
+      <app-add-position-dialog
+        *brnDialogContent="let ctx"
+        (formSubmit)="onAddPositionSubmit($event)"
+        (cancel)="closeAddPositionDialog()"
+      >
+      </app-add-position-dialog>
+    </hlm-dialog>
+
+    <!-- Edit Position Dialog -->
+    <hlm-dialog [state]="editDialogState" (closed)="closeEditPositionDialog()">
+      <app-edit-position-dialog
+        *brnDialogContent="let ctx"
+        [item]="selectedPositionItem!"
+        (formSubmit)="onEditPositionSubmit($event)"
+        (cancel)="closeEditPositionDialog()"
+      >
+      </app-edit-position-dialog>
+    </hlm-dialog>
   `,
   styles: [
     `
@@ -204,12 +240,16 @@ import {
 })
 export class ChartViewComponent {
   readonly store = inject(OrgStore);
-  private readonly _dialogService = inject(BrnDialogService);
+  private readonly _dialogService = inject(HlmDialogService);
+
+  // Dialog State
+  addDialogState: 'open' | 'closed' = 'closed';
+  editDialogState: 'open' | 'closed' = 'closed';
+  selectedPositionItem: PositionItem | null = null;
 
   @ViewChild('orgChart') orgChart?: NgxInteractiveOrgChart<OrgChartNode>;
 
   // Transform store data to OrgChartNode structure
-  // We assume single root for now. If multiple, we might need a virtual root or handle logic differently.
   chartData = computed(() => {
     const nodes = transformToOrgChartNode(this.store.nodeMap(), this.store.rootIds());
     return nodes.length > 0 ? nodes[0] : null;
@@ -217,7 +257,7 @@ export class ChartViewComponent {
 
   themeOptions: NgxInteractiveOrgChartTheme = {
     node: {
-      background: 'transparent', // We use custom card with its own background
+      background: 'transparent',
       shadow: 'none',
       borderRadius: '0',
       outlineColor: 'transparent',
@@ -238,35 +278,75 @@ export class ChartViewComponent {
     this.store.loadChart();
   }
 
-  // Library specific checks
   canDragNode = () => true;
   canDropNode = () => true;
 
-  // Handle drop event from the library
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   onNodeDrop(event: any) {
-    // event: { draggedNode: OrgChartNode, targetNode: OrgChartNode }
-    // We map this back to our store action
     if (event.draggedNode && event.targetNode) {
       this.store.moveNode({
         nodeId: event.draggedNode.id,
         newParentId: event.targetNode.id,
-        newIndex: 0, // Logic for index might need refinement if order matters, but for now append to start or end
+        newIndex: 0,
       });
     }
   }
 
-  openCreatePositionDialog() {
-    const dialogRef = this._dialogService.open(CreatePositionDialogComponent);
+  onDropFromSidebar(item: PositionItem, targetNode: WorkerNode) {
+    console.log('Adding node from CDK Drop:', item);
+    if (item && item.name) {
+      this.store.addNode(targetNode.id, item);
+    }
+  }
 
-    dialogRef.closed$.subscribe((result) => {
-      if (result) {
-        this.store.addSidebarPosition({
-          name: result.name,
-          code: result.section,
-        });
-      }
+  // --- Add Position Logic ---
+  openAddPositionDialog() {
+    this.addDialogState = 'open';
+  }
+
+  closeAddPositionDialog() {
+    this.addDialogState = 'closed';
+  }
+
+  onAddPositionSubmit(result: PositionFormData) {
+    this.store.addSidebarPosition({
+      name: result.name,
+      nameTh: result.nameTh,
+      nameZh: result.nameZh,
+      nameVi: result.nameVi,
+      code: result.section,
     });
+    this.closeAddPositionDialog();
+  }
+
+  // --- Edit Position Logic ---
+  openEditPositionDialog(item: PositionItem) {
+    this.selectedPositionItem = item;
+    this.editDialogState = 'open';
+  }
+
+  closeEditPositionDialog() {
+    this.editDialogState = 'closed';
+    this.selectedPositionItem = null;
+  }
+
+  onEditPositionSubmit(result: PositionFormData) {
+    if (this.selectedPositionItem) {
+      this.store.updateSidebarPosition(this.selectedPositionItem.id, {
+        name: result.name,
+        nameTh: result.nameTh,
+        nameZh: result.nameZh,
+        nameVi: result.nameVi,
+        code: result.section,
+      });
+    }
+    this.closeEditPositionDialog();
+  }
+
+  onSidebarDrop(event: CdkDragDrop<PositionItem[]>) {
+    if (event.previousContainer === event.container) {
+      this.store.reorderSidebarPositions(event.previousIndex, event.currentIndex);
+    }
   }
 
   onDeleteNode(nodeId: string) {
@@ -274,7 +354,6 @@ export class ChartViewComponent {
     if (!node) return;
 
     const hasChildren = node.childrenIds.length > 0;
-
     const dialogOptions = {
       context: { hasChildren, childrenCount: node.childrenIds.length },
     };
@@ -282,7 +361,8 @@ export class ChartViewComponent {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const dialogRef = this._dialogService.open(ConfirmDeleteDialogComponent, dialogOptions as any);
 
-    dialogRef.closed$.subscribe((action) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    dialogRef.closed$.subscribe((action: any) => {
       if (!action) return;
 
       if (action === 'delete') {

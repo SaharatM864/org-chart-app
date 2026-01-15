@@ -37,3 +37,12 @@ export interface MoveNodePayload {
   newParentId: string | null;
   newIndex: number;
 }
+
+export interface PositionFormData {
+  name: string;
+  nameTh: string;
+  nameZh: string;
+  nameVi: string;
+  section: string;
+  salaryType: string;
+}
