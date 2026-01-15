@@ -51,7 +51,7 @@ import { WorkerNode } from '../../data-access/org.model';
             <hlm-select-trigger class="w-full">
               <hlm-select-value />
             </hlm-select-trigger>
-            <hlm-select-content>
+            <hlm-select-content class="bg-white dark:bg-zinc-950">
               <hlm-option *ngFor="let node of candidates" [value]="node.id">
                 {{ node.name }} ({{ node.section || 'General' }})
               </hlm-option>

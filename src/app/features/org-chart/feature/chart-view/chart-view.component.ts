@@ -99,14 +99,18 @@ import { SelectParentDialogComponent } from '../../ui/dialogs/select-parent-dial
             cdkDrag
             [cdkDragData]="item"
             (cdkDragStarted)="onDragStarted()"
-            (cdkDragEnded)="onDragEnded($event)"
             (edit)="openEditPositionDialog($event)"
           ></app-position-item>
         </div>
       </aside>
 
       <!-- Main Chart Area -->
-      <main class="figma-bg-dots relative flex-1 overflow-hidden" id="main-drop-zone">
+      <main
+        class="figma-bg-dots relative flex-1 overflow-hidden"
+        id="main-drop-zone"
+        cdkDropList
+        (cdkDropListDropped)="onBackgroundDrop($event)"
+      >
         <div class="absolute top-4 right-4 z-10 flex flex-col gap-2">
           <!-- Toolbar Group -->
           <div
@@ -187,7 +191,8 @@ import { SelectParentDialogComponent } from '../../ui/dialogs/select-parent-dial
                 (delete)="onDeleteNode($event)"
                 (highlight)="store.setHighlight($event)"
                 (unhighlight)="store.setHighlight(null)"
-                (incomingNodeDrop)="onDropFromSidebar($event, node.data)"
+                (highlight)="store.setHighlight($event)"
+                (unhighlight)="store.setHighlight(null)"
               >
               </app-node-card>
             </ng-template>
@@ -264,7 +269,6 @@ export class ChartViewComponent {
   selectedPositionItem: PositionItem | null = null;
   parentCandidates: WorkerNode[] = [];
   pendingDropPosition: PositionItem | null = null;
-  isDropHandled = false;
 
   @ViewChild('orgChart') orgChart?: NgxInteractiveOrgChart<OrgChartNode>;
 
@@ -308,14 +312,6 @@ export class ChartViewComponent {
         newParentId: event.targetNode.id,
         newIndex: 0,
       });
-    }
-  }
-
-  onDropFromSidebar(item: PositionItem, targetNode: WorkerNode) {
-    console.log('Adding node from CDK Drop:', item);
-    if (item && item.name) {
-      this.store.addNode(targetNode.id, item);
-      this.isDropHandled = true; // Mark as handled immediately
     }
   }
 
@@ -371,37 +367,46 @@ export class ChartViewComponent {
 
   // --- Drag & Drop Handlers ---
   onDragStarted() {
-    this.isDropHandled = false;
+    // No-op for now, but good hook for visual feedback
   }
 
-  onDragEnded(event: any) {
-    // Optimization: Remove setTimeout to handle drop immediately.
-    // CDK typically fires 'dropped' (on list) before 'ended' (on drag item).
-    // If we've already handled the drop in onDropFromSidebar, isDropHandled will be true.
-    if (!this.isDropHandled) {
-      this.handleEmptySpaceDrop(event);
-    }
-    this.isDropHandled = false; // Reset for next drag
-  }
-
-  handleEmptySpaceDrop(event: any) {
+  // Handle drop on the background (Main Area)
+  // This becomes the Centralized Handler for ALL drops (Background & Nodes)
+  onBackgroundDrop(event: CdkDragDrop<any>) {
     // 1. Get the item data (from source)
-    const item = event.source.data as PositionItem;
+    const item = event.item.data as PositionItem;
     if (!item) return;
 
-    // 2. Get all available nodes as candidates
+    // 2. Hit Test: Check if we actually dropped on a Node
+    // We rely on document.elementFromPoint because CDK DropLists are now simplified
+    const { x, y } = event.dropPoint;
+    const element = document.elementFromPoint(x, y);
+    const nodeElement = element?.closest('[data-node-id]');
+
+    if (nodeElement) {
+      const nodeId = nodeElement.getAttribute('data-node-id');
+      if (nodeId) {
+        console.log('Hit Test Detection: Dropped on Node', nodeId);
+        this.store.addNode(nodeId, item);
+        return; // Exit early, do not show dialog
+      }
+    }
+
+    // 3. If NOT on a node (Empty Space), proceed with "Select Parent" Logic
     const allNodes = Object.values(this.store.nodeMap());
 
     if (allNodes.length === 0) {
       // If no nodes exist, just add as root (or handle as first node)
       this.store.addNode(null, item);
     } else {
-      // 3. Open dialog to let user select parent
+      // Open dialog to let user select parent
       this.parentCandidates = allNodes;
       this.pendingDropPosition = item;
       this.selectParentDialogState = 'open';
     }
   }
+
+  // Removed onDragEnded and handleEmptySpaceDrop as we now use native cdkDropList
 
   // --- Select Parent Dialog ---
   closeSelectParentDialog() {
