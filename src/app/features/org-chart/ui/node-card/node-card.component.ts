@@ -17,8 +17,13 @@ import { WorkerNode } from '../../data-access/org.model';
       class="group relative flex w-50 flex-col overflow-hidden border-l-4 bg-white p-3 transition-all hover:shadow-md"
       [class.border-l-primary]="!node.parentId"
       [class.border-l-secondary]="node.parentId"
-      [class.ring-2]="isHighlighted"
-      [class.ring-primary]="isHighlighted"
+      [class.ring-2]="!!highlightType"
+      [class.ring-primary]="highlightType === 'current'"
+      [class.ring-green-500]="highlightType === 'parent'"
+      [class.ring-orange-500]="highlightType === 'child'"
+      [class.bg-blue-50]="highlightType === 'current'"
+      [class.bg-green-50]="highlightType === 'parent'"
+      [class.bg-orange-50]="highlightType === 'child'"
       [attr.data-level]="node.level"
       [attr.data-node-id]="node.id"
     >
@@ -29,18 +34,22 @@ import { WorkerNode } from '../../data-access/org.model';
         size="icon"
         class="absolute top-1 right-1 h-6 w-6 opacity-0 transition-opacity group-hover:opacity-100 hover:bg-destructive/10 hover:text-destructive"
         (click)="onDelete($event)"
+        (mouseenter)="onMouseEnter()"
+        (mouseleave)="onMouseLeave()"
       >
         <ng-icon name="lucideX" size="14"></ng-icon>
       </button>
 
       <!-- Content -->
-      <div
-        class="flex items-start gap-3"
-        (mouseenter)="onMouseEnter()"
-        (mouseleave)="onMouseLeave()"
-      >
+      <div class="flex items-start gap-3">
         <div
           class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-muted text-muted-foreground"
+          [class.bg-primary]="highlightType === 'current'"
+          [class.text-primary-foreground]="highlightType === 'current'"
+          [class.bg-green-500]="highlightType === 'parent'"
+          [class.text-white]="highlightType === 'parent'"
+          [class.bg-orange-500]="highlightType === 'child'"
+          [class.text-white]="highlightType === 'child'"
         >
           <ng-icon name="lucideUser" size="16"></ng-icon>
         </div>
@@ -69,7 +78,7 @@ import { WorkerNode } from '../../data-access/org.model';
 })
 export class NodeCardComponent {
   @Input({ required: true }) node!: WorkerNode;
-  @Input() isHighlighted = false;
+  @Input() highlightType: 'current' | 'parent' | 'child' | null = null;
   @Output() delete = new EventEmitter<string>();
   @Output() highlight = new EventEmitter<string>();
   @Output() unhighlight = new EventEmitter<void>();

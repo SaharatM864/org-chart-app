@@ -56,32 +56,37 @@ export const OrgStore = signalStore(
     }),
     highlightedIds: computed(() => {
       const id = store.highlightedNodeId();
-      if (!id) return new Set<string>();
+      if (!id) return new Map<string, 'current' | 'parent' | 'child'>();
 
       const map = store.nodeMap();
-      const set = new Set<string>();
-      set.add(id);
+      const resultMap = new Map<string, 'current' | 'parent' | 'child'>();
 
-      // Traverse Up (Parents)
+      // 1. Valid Check
+      if (!map[id]) return resultMap;
+
+      // 2. Add Current
+      resultMap.set(id, 'current');
+
+      // 3. Traverse Up (Parents)
       let curr = map[id];
       while (curr && curr.parentId) {
-        set.add(curr.parentId);
+        resultMap.set(curr.parentId, 'parent');
         curr = map[curr.parentId];
       }
 
-      // Traverse Down (Children) - Recursive
+      // 4. Traverse Down (Children) - Recursive
       const addChildren = (nodeId: string) => {
         const node = map[nodeId];
         if (node) {
           node.childrenIds.forEach((childId) => {
-            set.add(childId);
+            resultMap.set(childId, 'child');
             addChildren(childId);
           });
         }
       };
       addChildren(id);
 
-      return set;
+      return resultMap;
     }),
   })),
   withMethods((store, orgService = inject(OrgService)) => ({

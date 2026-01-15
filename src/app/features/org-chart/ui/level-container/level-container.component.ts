@@ -32,7 +32,7 @@ import { NodeCardComponent } from '../node-card/node-card.component';
         <app-node-card
           *ngFor="let node of nodes"
           [node]="node"
-          [isHighlighted]="highlightedIds.has(node.id)"
+          [highlightType]="highlightedIds.get(node.id) || null"
           cdkDrag
           [cdkDragData]="node"
           (delete)="deleteNode.emit($event)"
@@ -56,7 +56,7 @@ export class LevelContainerComponent {
   @Input({ required: true }) nodes: WorkerNode[] = [];
   @Input() connectedIds: string[] = [];
   @Input() isDragging = false;
-  @Input() highlightedIds = new Set<string>();
+  @Input() highlightedIds = new Map<string, 'current' | 'parent' | 'child'>();
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   @Output() itemDropped = new EventEmitter<CdkDragDrop<any>>();

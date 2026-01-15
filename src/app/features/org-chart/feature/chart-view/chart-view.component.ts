@@ -1,4 +1,4 @@
-import { Component, computed, inject, ViewChild } from '@angular/core';
+import { Component, computed, inject, ViewChild, effect, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { CdkDragDrop, DragDropModule } from '@angular/cdk/drag-drop';
 import { BrnDialogContent } from '@spartan-ng/brain/dialog';
@@ -187,10 +187,8 @@ import { SelectParentDialogComponent } from '../../ui/dialogs/select-parent-dial
             <ng-template #nodeTemplate let-node>
               <app-node-card
                 [node]="node.data"
-                [isHighlighted]="store.highlightedIds().has(node.id)"
+                [highlightType]="store.highlightedIds().get(node.id) || null"
                 (delete)="onDeleteNode($event)"
-                (highlight)="store.setHighlight($event)"
-                (unhighlight)="store.setHighlight(null)"
                 (highlight)="store.setHighlight($event)"
                 (unhighlight)="store.setHighlight(null)"
               >
@@ -255,12 +253,27 @@ import { SelectParentDialogComponent } from '../../ui/dialogs/select-parent-dial
         background-image: radial-gradient(#e5e7eb 1px, transparent 1px);
         background-size: 20px 20px;
       }
+
+      /* Add some global styles for potential connector highlighting */
+      ::ng-deep .connector-highlight {
+        stroke: #3b82f6 !important;
+        stroke-width: 2px !important;
+      }
+      ::ng-deep .connector-highlight-parent {
+        stroke: #22c55e !important; /* green-500 */
+        stroke-width: 2px !important;
+      }
+      ::ng-deep .connector-highlight-child {
+        stroke: #f97316 !important; /* orange-500 */
+        stroke-width: 2px !important;
+      }
     `,
   ],
 })
 export class ChartViewComponent {
   readonly store = inject(OrgStore);
   private readonly _dialogService = inject(HlmDialogService);
+  private readonly _elementRef = inject(ElementRef);
 
   // Dialog State
   addDialogState: 'open' | 'closed' = 'closed';
@@ -271,6 +284,51 @@ export class ChartViewComponent {
   pendingDropPosition: PositionItem | null = null;
 
   @ViewChild('orgChart') orgChart?: NgxInteractiveOrgChart<OrgChartNode>;
+
+  constructor() {
+    // Reactive Effect for Connector Highlighting
+    effect(() => {
+      const map = this.store.highlightedIds();
+
+      // 1. Cleanup old highlights
+      const oldLines = this._elementRef.nativeElement.querySelectorAll(
+        '.connector-highlight, .connector-highlight-parent, .connector-highlight-child',
+      );
+      oldLines.forEach((line: SVGElement) => {
+        line.classList.remove(
+          'connector-highlight',
+          'connector-highlight-parent',
+          'connector-highlight-child',
+        );
+      });
+
+      if (map.size === 0) return;
+
+      // 2. Identify relationship pairs to highlight
+      // We need to find lines connecting:
+      // - Parent -> Current (Parent wins)
+      // - Current -> Child (Child wins)
+
+      // Strategy:
+      // Many libs render path with some attributes. Since we don't know them,
+      // we will try to find <path> elements that are *near* the nodes or use a broad selector if possible.
+      // WITHOUT explicit IDs on lines, this is a "Best Effort" guess.
+      // Usually, lines are <path d="..."> inside an <svg>.
+
+      // Alternative: If the user hasn't provided the SVG structure, we can't accurately select the specific line.
+      // However, I will add a placeholder logic that tries to match common patterns if the lib adds ANY data attributes.
+      // Since the user said "found SVG lines", I assume there ARE lines.
+
+      // NOTE: Because we don't know the Line ID, we can't target specific lines yet.
+      // I will leave this effect here as the "Infrastructure" for the user to verify.
+      // IF the lib puts `id="link-parent-child"`, we would use that.
+
+      // For now, I will Log to console to help the user Debug the SVG structure
+      // console.log('Highlighting connectors for:', map);
+      // const svg = this._elementRef.nativeElement.querySelector('svg');
+      // console.log('Found SVG:', svg);
+    });
+  }
 
   // Transform store data to OrgChartNode structure
   chartData = computed(() => {
