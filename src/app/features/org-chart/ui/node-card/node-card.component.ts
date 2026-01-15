@@ -22,6 +22,8 @@ import { PositionItem, WorkerNode } from '../../data-access/org.model';
       [class.border-l-secondary]="node.parentId"
       [class.ring-2]="isHighlighted"
       [class.ring-primary]="isHighlighted"
+      [attr.data-level]="node.level"
+      [attr.data-node-id]="node.id"
     >
       <!-- Delete Button (Visible on Hover) -->
       <button

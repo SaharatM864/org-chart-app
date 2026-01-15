@@ -32,6 +32,7 @@ import {
   NgxInteractiveOrgChartTheme,
 } from 'ngx-interactive-org-chart';
 import { PositionFormData, PositionItem, WorkerNode } from '../../data-access/org.model';
+import { SelectParentDialogComponent } from '../../ui/dialogs/select-parent-dialog.component';
 
 @Component({
   selector: 'app-chart-view',
@@ -48,6 +49,7 @@ import { PositionFormData, PositionItem, WorkerNode } from '../../data-access/or
     HlmDialog,
     AddPositionDialogComponent,
     EditPositionDialogComponent,
+    SelectParentDialogComponent,
   ],
   providers: [
     HlmDialogService,
@@ -96,13 +98,15 @@ import { PositionFormData, PositionItem, WorkerNode } from '../../data-access/or
             [item]="item"
             cdkDrag
             [cdkDragData]="item"
+            (cdkDragStarted)="onDragStarted()"
+            (cdkDragEnded)="onDragEnded($event)"
             (edit)="openEditPositionDialog($event)"
           ></app-position-item>
         </div>
       </aside>
 
       <!-- Main Chart Area -->
-      <main class="figma-bg-dots relative flex-1 overflow-hidden">
+      <main class="figma-bg-dots relative flex-1 overflow-hidden" id="main-drop-zone">
         <div class="absolute top-4 right-4 z-10 flex flex-col gap-2">
           <!-- Toolbar Group -->
           <div
@@ -223,6 +227,17 @@ import { PositionFormData, PositionItem, WorkerNode } from '../../data-access/or
       >
       </app-edit-position-dialog>
     </hlm-dialog>
+
+    <!-- Select Parent Dialog -->
+    <hlm-dialog [state]="selectParentDialogState" (closed)="closeSelectParentDialog()">
+      <app-select-parent-dialog
+        *brnDialogContent="let ctx"
+        [candidates]="parentCandidates"
+        (parentSelected)="onParentSelected($event)"
+        (cancel)="closeSelectParentDialog()"
+      >
+      </app-select-parent-dialog>
+    </hlm-dialog>
   `,
   styles: [
     `
@@ -245,7 +260,11 @@ export class ChartViewComponent {
   // Dialog State
   addDialogState: 'open' | 'closed' = 'closed';
   editDialogState: 'open' | 'closed' = 'closed';
+  selectParentDialogState: 'open' | 'closed' = 'closed';
   selectedPositionItem: PositionItem | null = null;
+  parentCandidates: WorkerNode[] = [];
+  pendingDropPosition: PositionItem | null = null;
+  isDropHandled = false;
 
   @ViewChild('orgChart') orgChart?: NgxInteractiveOrgChart<OrgChartNode>;
 
@@ -296,6 +315,7 @@ export class ChartViewComponent {
     console.log('Adding node from CDK Drop:', item);
     if (item && item.name) {
       this.store.addNode(targetNode.id, item);
+      this.isDropHandled = true; // Mark as handled immediately
     }
   }
 
@@ -347,6 +367,54 @@ export class ChartViewComponent {
     if (event.previousContainer === event.container) {
       this.store.reorderSidebarPositions(event.previousIndex, event.currentIndex);
     }
+  }
+
+  // --- Drag & Drop Handlers ---
+  onDragStarted() {
+    this.isDropHandled = false;
+  }
+
+  onDragEnded(event: any) {
+    // Optimization: Remove setTimeout to handle drop immediately.
+    // CDK typically fires 'dropped' (on list) before 'ended' (on drag item).
+    // If we've already handled the drop in onDropFromSidebar, isDropHandled will be true.
+    if (!this.isDropHandled) {
+      this.handleEmptySpaceDrop(event);
+    }
+    this.isDropHandled = false; // Reset for next drag
+  }
+
+  handleEmptySpaceDrop(event: any) {
+    // 1. Get the item data (from source)
+    const item = event.source.data as PositionItem;
+    if (!item) return;
+
+    // 2. Get all available nodes as candidates
+    const allNodes = Object.values(this.store.nodeMap());
+
+    if (allNodes.length === 0) {
+      // If no nodes exist, just add as root (or handle as first node)
+      this.store.addNode(null, item);
+    } else {
+      // 3. Open dialog to let user select parent
+      this.parentCandidates = allNodes;
+      this.pendingDropPosition = item;
+      this.selectParentDialogState = 'open';
+    }
+  }
+
+  // --- Select Parent Dialog ---
+  closeSelectParentDialog() {
+    this.selectParentDialogState = 'closed';
+    this.parentCandidates = [];
+    this.pendingDropPosition = null;
+  }
+
+  onParentSelected(parentId: string) {
+    if (this.pendingDropPosition && parentId) {
+      this.store.addNode(parentId, this.pendingDropPosition);
+    }
+    this.closeSelectParentDialog();
   }
 
   onDeleteNode(nodeId: string) {
