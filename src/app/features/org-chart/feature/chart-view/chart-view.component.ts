@@ -2,6 +2,7 @@ import { Component, computed, inject, ViewChild, effect, ElementRef } from '@ang
 import { CommonModule } from '@angular/common';
 import { CdkDragDrop, DragDropModule } from '@angular/cdk/drag-drop';
 import { BrnDialogContent } from '@spartan-ng/brain/dialog';
+import { BrnTooltipImports } from '@spartan-ng/brain/tooltip';
 import { OrgStore } from '../../data-access/org.store';
 import { PositionItemComponent } from '../../ui/position-item/position-item.component';
 import { AddPositionDialogComponent } from '../../ui/dialogs/add-position-dialog.component';
@@ -10,24 +11,9 @@ import { ConfirmDeleteDialogComponent } from '../../ui/dialogs/confirm-delete-di
 import { NodeCardComponent } from '../../ui/node-card/node-card.component';
 import { transformToOrgChartNode } from '../../utils/org-chart-adapter';
 import { HlmButton } from '@spartan-ng/helm/button';
-import { HlmDialog, HlmDialogService } from '@spartan-ng/helm/dialog';
-import { NgIconComponent, provideIcons } from '@ng-icons/core';
-import {
-  lucidePlus,
-  lucideLayoutGrid,
-  lucideMinus,
-  lucideMaximize,
-  lucideMinimize,
-  lucideMap,
-  lucideArrowRightLeft,
-  lucideChevronsDown,
-  lucideChevronsUp,
-  lucideRotateCcw,
-  lucideMove,
-  lucideX,
-  lucideUser,
-  lucideAlertTriangle,
-} from '@ng-icons/lucide';
+import { HlmDialog } from '@spartan-ng/helm/dialog';
+import { HlmTooltipImports } from '@spartan-ng/helm/tooltip';
+import { NgIconComponent } from '@ng-icons/core';
 // eslint-disable-next-line @nx/enforce-module-boundaries
 import {
   NgxInteractiveOrgChart,
@@ -50,6 +36,8 @@ import { SelectParentDialogComponent } from '../../ui/dialogs/select-parent-dial
     NgIconComponent,
     BrnDialogContent,
     HlmDialog,
+    BrnTooltipImports,
+    HlmTooltipImports,
     AddPositionDialogComponent,
     EditPositionDialogComponent,
     SelectParentDialogComponent,
@@ -57,10 +45,6 @@ import { SelectParentDialogComponent } from '../../ui/dialogs/select-parent-dial
   ],
   providers: [],
   template: `
-    <!-- 
-      Using cdkDropListGroup to automatically connect 
-      Sidebar (Source) -> NodeCards (Targets) 
-    -->
     <div class="flex h-full w-full bg-background text-foreground" cdkDropListGroup>
       <!-- Sidebar / Position List -->
       <aside class="bg-card flex w-80 flex-col gap-4 overflow-y-auto border-r border-border p-4">
@@ -105,57 +89,257 @@ import { SelectParentDialogComponent } from '../../ui/dialogs/select-parent-dial
           <div
             class="flex flex-col gap-1 rounded-lg border bg-background/95 p-1 shadow-sm backdrop-blur supports-backdrop-filter:bg-background/60"
           >
-            <button hlmBtn variant="ghost" size="icon" (click)="zoomIn()" title="Zoom In">
-              <ng-icon name="lucidePlus" size="18"></ng-icon>
-            </button>
-            <button hlmBtn variant="ghost" size="icon" (click)="zoomOut()" title="Zoom Out">
-              <ng-icon name="lucideMinus" size="18"></ng-icon>
-            </button>
-            <button hlmBtn variant="ghost" size="icon" (click)="resetView()" title="Reset View">
-              <ng-icon name="lucideRotateCcw" size="18"></ng-icon>
-            </button>
+            <hlm-tooltip class="block">
+              <button
+                hlmTooltipTrigger
+                position="left"
+                [showDelay]="300"
+                [hideDelay]="200"
+                [exitAnimationDuration]="300"
+                hlmBtn
+                variant="ghost"
+                size="icon"
+                (click)="zoomIn()"
+              >
+                <ng-icon name="lucidePlus" size="18"></ng-icon>
+              </button>
+              <span *brnTooltipContent class="relative flex items-center">
+                Zoom In
+                <span class="absolute top-1/2 -right-2 -translate-y-1/2 -rotate-90">
+                  <svg
+                    class="block fill-primary"
+                    width="12"
+                    height="6"
+                    viewBox="0 0 30 10"
+                    preserveAspectRatio="none"
+                  >
+                    <polygon points="0,0 30,0 15,10"></polygon>
+                  </svg>
+                </span>
+              </span>
+            </hlm-tooltip>
+
+            <hlm-tooltip class="block">
+              <button
+                hlmTooltipTrigger
+                position="left"
+                [showDelay]="300"
+                [hideDelay]="200"
+                [exitAnimationDuration]="300"
+                hlmBtn
+                variant="ghost"
+                size="icon"
+                (click)="zoomOut()"
+              >
+                <ng-icon name="lucideMinus" size="18"></ng-icon>
+              </button>
+              <span *brnTooltipContent class="relative flex items-center">
+                Zoom Out
+                <span class="absolute top-1/2 -right-2 -translate-y-1/2 -rotate-90">
+                  <svg
+                    class="block fill-primary"
+                    width="12"
+                    height="6"
+                    viewBox="0 0 30 10"
+                    preserveAspectRatio="none"
+                  >
+                    <polygon points="0,0 30,0 15,10"></polygon>
+                  </svg>
+                </span>
+              </span>
+            </hlm-tooltip>
+
+            <hlm-tooltip class="block">
+              <button
+                hlmTooltipTrigger
+                position="left"
+                [showDelay]="300"
+                [hideDelay]="200"
+                [exitAnimationDuration]="300"
+                hlmBtn
+                variant="ghost"
+                size="icon"
+                (click)="resetView()"
+              >
+                <ng-icon name="lucideRotateCcw" size="18"></ng-icon>
+              </button>
+              <span *brnTooltipContent class="relative flex items-center">
+                Reset View
+                <span class="absolute top-1/2 -right-2 -translate-y-1/2 -rotate-90">
+                  <svg
+                    class="block fill-primary"
+                    width="12"
+                    height="6"
+                    viewBox="0 0 30 10"
+                    preserveAspectRatio="none"
+                  >
+                    <polygon points="0,0 30,0 15,10"></polygon>
+                  </svg>
+                </span>
+              </span>
+            </hlm-tooltip>
+
             <div class="my-1 h-px bg-border"></div>
-            <button
-              hlmBtn
-              variant="ghost"
-              size="icon"
-              (click)="toggleDragAndDrop()"
-              [class.bg-accent]="isDraggable"
-              title="{{ isDraggable ? 'Disable Drag & Drop' : 'Enable Drag & Drop' }}"
-            >
-              <ng-icon name="lucideMove" size="18"></ng-icon>
-            </button>
+
+            <hlm-tooltip class="block">
+              <button
+                hlmTooltipTrigger
+                position="left"
+                [showDelay]="300"
+                [hideDelay]="200"
+                [exitAnimationDuration]="300"
+                hlmBtn
+                variant="ghost"
+                size="icon"
+                (click)="toggleDragAndDrop()"
+                [class.bg-accent]="isDraggable"
+              >
+                <ng-icon name="lucideMove" size="18"></ng-icon>
+              </button>
+              <span *brnTooltipContent class="relative flex items-center">
+                {{ isDraggable ? 'Disable Drag & Drop' : 'Enable Drag & Drop' }}
+                <span class="absolute top-1/2 -right-2 -translate-y-1/2 -rotate-90">
+                  <svg
+                    class="block fill-primary"
+                    width="12"
+                    height="6"
+                    viewBox="0 0 30 10"
+                    preserveAspectRatio="none"
+                  >
+                    <polygon points="0,0 30,0 15,10"></polygon>
+                  </svg>
+                </span>
+              </span>
+            </hlm-tooltip>
+
             <div class="my-1 h-px bg-border"></div>
-            <button
-              hlmBtn
-              variant="ghost"
-              size="icon"
-              (click)="switchLayout()"
-              title="Toggle Layout (Vertical/Horizontal)"
-            >
-              <ng-icon
-                name="lucideArrowRightLeft"
-                size="18"
-                [class.rotate-90]="layoutDirection === 'vertical'"
-              ></ng-icon>
-            </button>
-            <button
-              hlmBtn
-              variant="ghost"
-              size="icon"
-              (click)="toggleMiniMap()"
-              [class.bg-accent]="showMiniMap"
-              title="Toggle Mini Map"
-            >
-              <ng-icon name="lucideMap" size="18"></ng-icon>
-            </button>
+
+            <hlm-tooltip class="block">
+              <button
+                hlmTooltipTrigger
+                position="left"
+                [showDelay]="300"
+                [hideDelay]="200"
+                [exitAnimationDuration]="300"
+                hlmBtn
+                variant="ghost"
+                size="icon"
+                (click)="switchLayout()"
+              >
+                <ng-icon
+                  name="lucideArrowRightLeft"
+                  size="18"
+                  [class.rotate-90]="layoutDirection === 'vertical'"
+                ></ng-icon>
+              </button>
+              <span *brnTooltipContent class="relative flex items-center">
+                Toggle Layout
+                <span class="absolute top-1/2 -right-2 -translate-y-1/2 -rotate-90">
+                  <svg
+                    class="block fill-primary"
+                    width="12"
+                    height="6"
+                    viewBox="0 0 30 10"
+                    preserveAspectRatio="none"
+                  >
+                    <polygon points="0,0 30,0 15,10"></polygon>
+                  </svg>
+                </span>
+              </span>
+            </hlm-tooltip>
+
+            <hlm-tooltip class="block">
+              <button
+                hlmTooltipTrigger
+                position="left"
+                [showDelay]="300"
+                [hideDelay]="200"
+                [exitAnimationDuration]="300"
+                hlmBtn
+                variant="ghost"
+                size="icon"
+                (click)="toggleMiniMap()"
+                [class.bg-accent]="showMiniMap"
+              >
+                <ng-icon name="lucideMap" size="18"></ng-icon>
+              </button>
+              <span *brnTooltipContent class="relative flex items-center">
+                Toggle Mini Map
+                <span class="absolute top-1/2 -right-2 -translate-y-1/2 -rotate-90">
+                  <svg
+                    class="block fill-primary"
+                    width="12"
+                    height="6"
+                    viewBox="0 0 30 10"
+                    preserveAspectRatio="none"
+                  >
+                    <polygon points="0,0 30,0 15,10"></polygon>
+                  </svg>
+                </span>
+              </span>
+            </hlm-tooltip>
+
             <div class="my-1 h-px bg-border"></div>
-            <button hlmBtn variant="ghost" size="icon" (click)="expandAll()" title="Expand All">
-              <ng-icon name="lucideChevronsDown" size="18"></ng-icon>
-            </button>
-            <button hlmBtn variant="ghost" size="icon" (click)="collapseAll()" title="Collapse All">
-              <ng-icon name="lucideChevronsUp" size="18"></ng-icon>
-            </button>
+
+            <hlm-tooltip class="block">
+              <button
+                hlmTooltipTrigger
+                position="left"
+                [showDelay]="300"
+                [hideDelay]="200"
+                [exitAnimationDuration]="300"
+                hlmBtn
+                variant="ghost"
+                size="icon"
+                (click)="expandAll()"
+              >
+                <ng-icon name="lucideChevronsDown" size="18"></ng-icon>
+              </button>
+              <span *brnTooltipContent class="relative flex items-center">
+                Expand All
+                <span class="absolute top-1/2 -right-2 -translate-y-1/2 -rotate-90">
+                  <svg
+                    class="block fill-primary"
+                    width="12"
+                    height="6"
+                    viewBox="0 0 30 10"
+                    preserveAspectRatio="none"
+                  >
+                    <polygon points="0,0 30,0 15,10"></polygon>
+                  </svg>
+                </span>
+              </span>
+            </hlm-tooltip>
+
+            <hlm-tooltip class="block">
+              <button
+                hlmTooltipTrigger
+                position="left"
+                [showDelay]="300"
+                [hideDelay]="200"
+                [exitAnimationDuration]="300"
+                hlmBtn
+                variant="ghost"
+                size="icon"
+                (click)="collapseAll()"
+              >
+                <ng-icon name="lucideChevronsUp" size="18"></ng-icon>
+              </button>
+              <span *brnTooltipContent class="relative flex items-center">
+                Collapse All
+                <span class="absolute top-1/2 -right-2 -translate-y-1/2 -rotate-90">
+                  <svg
+                    class="block fill-primary"
+                    width="12"
+                    height="6"
+                    viewBox="0 0 30 10"
+                    preserveAspectRatio="none"
+                  >
+                    <polygon points="0,0 30,0 15,10"></polygon>
+                  </svg>
+                </span>
+              </span>
+            </hlm-tooltip>
           </div>
         </div>
 
@@ -275,7 +459,6 @@ export class ChartViewComponent {
   @ViewChild('orgChart') orgChart?: NgxInteractiveOrgChart<OrgChartNode>;
 
   constructor() {
-    // Reactive Effect for Connector Highlighting
     effect(() => {
       const map = this.store.highlightedIds();
 
@@ -292,30 +475,6 @@ export class ChartViewComponent {
       });
 
       if (map.size === 0) return;
-
-      // 2. Identify relationship pairs to highlight
-      // We need to find lines connecting:
-      // - Parent -> Current (Parent wins)
-      // - Current -> Child (Child wins)
-
-      // Strategy:
-      // Many libs render path with some attributes. Since we don't know them,
-      // we will try to find <path> elements that are *near* the nodes or use a broad selector if possible.
-      // WITHOUT explicit IDs on lines, this is a "Best Effort" guess.
-      // Usually, lines are <path d="..."> inside an <svg>.
-
-      // Alternative: If the user hasn't provided the SVG structure, we can't accurately select the specific line.
-      // However, I will add a placeholder logic that tries to match common patterns if the lib adds ANY data attributes.
-      // Since the user said "found SVG lines", I assume there ARE lines.
-
-      // NOTE: Because we don't know the Line ID, we can't target specific lines yet.
-      // I will leave this effect here as the "Infrastructure" for the user to verify.
-      // IF the lib puts `id="link-parent-child"`, we would use that.
-
-      // For now, I will Log to console to help the user Debug the SVG structure
-      // console.log('Highlighting connectors for:', map);
-      // const svg = this._elementRef.nativeElement.querySelector('svg');
-      // console.log('Found SVG:', svg);
     });
   }
 
@@ -351,9 +510,8 @@ export class ChartViewComponent {
   canDragNode = () => true;
   canDropNode = () => true;
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  onNodeDrop(event: any) {
-    if (event.draggedNode && event.targetNode) {
+  onNodeDrop(event: { draggedNode: OrgChartNode; targetNode: OrgChartNode }) {
+    if (event.draggedNode?.id && event.targetNode?.id) {
       this.store.moveNode({
         nodeId: event.draggedNode.id,
         newParentId: event.targetNode.id,
@@ -419,7 +577,7 @@ export class ChartViewComponent {
 
   // Handle drop on the background (Main Area)
   // This becomes the Centralized Handler for ALL drops (Background & Nodes)
-  onBackgroundDrop(event: CdkDragDrop<any>) {
+  onBackgroundDrop(event: CdkDragDrop<PositionItem[]>) {
     // 1. Get the item data (from source)
     const item = event.item.data as PositionItem;
     if (!item) return;
