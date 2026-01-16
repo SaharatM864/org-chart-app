@@ -17,9 +17,7 @@ import { WorkerNode } from '../../data-access/org.model';
       Using bg-white/95 explicitly ensures stable background color.
     -->
     <div
-      class="text-card-foreground group relative flex w-56 flex-col overflow-hidden rounded-xl border border-l-[6px] border-border bg-white/95 p-4 shadow-sm backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl dark:border-border/50 dark:bg-zinc-900/95 dark:shadow-none dark:hover:border-primary/50"
-      [class.border-l-primary]="!node.parentId"
-      [class.border-l-secondary]="node.parentId"
+      class="group relative flex w-56 flex-col overflow-hidden rounded-xl border border-border bg-card p-4 text-card-foreground shadow-sm backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl dark:border-border/50 dark:shadow-none dark:hover:border-primary/50"
       [class.ring-2]="!!highlightType"
       [class.ring-primary]="highlightType === 'current'"
       [class.ring-green-500]="highlightType === 'parent'"
@@ -71,15 +69,18 @@ import { WorkerNode } from '../../data-access/org.model';
         </div>
       </div>
 
-      <div
-        class="mt-3 flex items-center justify-between border-t border-border/40 pt-2 text-[10px] font-medium text-muted-foreground/80"
-      >
-        <span class="rounded-full bg-secondary/20 px-2 py-0.5 text-secondary-foreground"
-          >Lvl {{ node.level }}</span
+      <div class="mt-3 flex items-center justify-between border-t border-border/40 pt-2">
+        <span
+          class="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-0.5 text-[10px] font-medium text-slate-700 dark:bg-slate-800 dark:text-slate-300"
         >
-        <span [class.text-primary]="node.salaryType === 'Management'">{{
-          node.salaryType || 'Normal'
-        }}</span>
+          Lvl {{ node.level }}
+        </span>
+        <span
+          class="inline-flex items-center rounded-full px-2.5 py-0.5 text-[10px] font-medium"
+          [ngClass]="salaryTypeClasses"
+        >
+          {{ node.salaryType || 'Normal' }}
+        </span>
       </div>
     </div>
   `,
@@ -91,6 +92,17 @@ export class NodeCardComponent {
   @Output() edit = new EventEmitter<string>();
   @Output() highlight = new EventEmitter<string>();
   @Output() unhighlight = new EventEmitter<void>();
+
+  get salaryTypeClasses(): string {
+    switch (this.node.salaryType) {
+      case 'Management':
+        return 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300';
+      case 'Admin':
+        return 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300';
+      default:
+        return 'bg-gray-100 text-gray-600 dark:bg-zinc-800 dark:text-zinc-400';
+    }
+  }
 
   onDelete(event: Event) {
     event.stopPropagation();

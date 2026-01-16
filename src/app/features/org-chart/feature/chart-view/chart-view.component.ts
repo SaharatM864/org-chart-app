@@ -1,6 +1,6 @@
 import { Component, computed, inject, ViewChild, effect, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { CdkDragDrop, DragDropModule } from '@angular/cdk/drag-drop';
+import { CdkDragDrop, CdkDragRelease, DragDropModule } from '@angular/cdk/drag-drop';
 
 import { BrnDialogContent } from '@spartan-ng/brain/dialog';
 import { OrgStore } from '../../data-access/org.store';
@@ -20,7 +20,12 @@ import {
   OrgChartNode,
   NgxInteractiveOrgChartTheme,
 } from 'ngx-interactive-org-chart';
-import { PositionFormData, PositionItem, WorkerNode, SalaryType } from '../../data-access/org.model';
+import {
+  PositionFormData,
+  PositionItem,
+  WorkerNode,
+  SalaryType,
+} from '../../data-access/org.model';
 import { SelectParentDialogComponent } from '../../ui/dialogs/select-parent-dialog.component';
 import { ChartToolbarComponent } from '../../ui/chart-toolbar/chart-toolbar.component';
 import { PositionSidebarComponent } from '../../ui/position-sidebar/position-sidebar.component';
@@ -135,6 +140,7 @@ import { EditPositionDialogComponent } from '../../ui/dialogs/edit-position-dial
             (addPosition)="openAddPositionDialog()"
             (editPosition)="openEditPositionDialog($event)"
             (reorder)="onSidebarReorder($event)"
+            (dragReleased)="handleDragReleased($event)"
             (close)="closeSidebar()"
           ></app-position-sidebar>
         </ng-template>
@@ -216,7 +222,7 @@ export class ChartViewComponent {
   editNodeDialogState: 'open' | 'closed' = 'closed';
   selectParentDialogState: 'open' | 'closed' = 'closed';
   moveNodeDialogState: 'open' | 'closed' = 'closed';
-  isSidebarOpen = false;
+  isSidebarOpen = true;
 
   deleteDialogState = {
     isOpen: false,
@@ -269,8 +275,8 @@ export class ChartViewComponent {
       padding: '0',
     },
     connector: {
-      color: '#e2e8f0',
-      activeColor: '#3b82f6',
+      color: 'var(--border)',
+      activeColor: 'var(--primary)',
     },
   };
 
@@ -380,17 +386,103 @@ export class ChartViewComponent {
   }
 
   onBackgroundDrop(event: CdkDragDrop<PositionItem[]>) {
+    // Legacy handler - kept for fallback but logic moved to handleDragReleased
     const item = event.item.data as PositionItem;
     if (!item) return;
 
-    const { x, y } = event.dropPoint;
+    // If we are here, it means the drop was successful on the background.
+    // We should still try to run the animation if it wasn't already run by dragReleased.
+    // But since dragReleased runs first, we might just want to ignore this or use it as confirmation.
+    // For now, let's rely on dragReleased for the animation.
+
+    // const { x, y } = event.dropPoint;
+    // this.handleDropLogic(x, y, item);
+  }
+
+  handleDragReleased(event: { item: PositionItem; event: CdkDragRelease }) {
+    const { item, event: cdkEvent } = event;
+    const mouseEvent = cdkEvent.event;
+
+    let x, y;
+    if (mouseEvent instanceof MouseEvent) {
+      x = mouseEvent.clientX;
+      y = mouseEvent.clientY;
+    } else if (window.TouchEvent && mouseEvent instanceof TouchEvent) {
+      x = mouseEvent.changedTouches[0].clientX;
+      y = mouseEvent.changedTouches[0].clientY;
+    } else {
+      return;
+    }
+
+    // Check if we dropped over the main drop zone
+    const mainDropZone = document.getElementById('main-drop-zone');
+    const elementAtPoint = document.elementFromPoint(x, y);
+
+    if (
+      mainDropZone &&
+      (mainDropZone.contains(elementAtPoint) || mainDropZone === elementAtPoint)
+    ) {
+      // Valid drop!
+
+      // 1. Run Animation
+      this.runDropAnimation();
+
+      // 2. Prevent CDK Return Animation (by hiding the preview)
+      const preview = document.querySelector('.cdk-drag-preview') as HTMLElement;
+      if (preview) {
+        preview.style.opacity = '0';
+        preview.style.display = 'none'; // Force hide
+      }
+
+      // 3. Execute Logic
+      this.handleDropLogic(x, y, item);
+    }
+  }
+
+  private runDropAnimation() {
+    const preview = document.querySelector('.cdk-drag-preview') as HTMLElement;
+    if (preview) {
+      const clone = preview.cloneNode(true) as HTMLElement;
+      const rect = preview.getBoundingClientRect();
+
+      clone.style.position = 'fixed';
+      clone.style.top = `${rect.top}px`;
+      clone.style.left = `${rect.left}px`;
+      clone.style.width = `${rect.width}px`;
+      clone.style.height = `${rect.height}px`;
+      clone.style.zIndex = '1000';
+      clone.style.transition = 'all 0.3s ease-out';
+      clone.style.pointerEvents = 'none';
+      clone.style.margin = '0';
+      clone.style.boxSizing = 'border-box';
+
+      const computedStyle = window.getComputedStyle(preview);
+      clone.style.borderRadius = computedStyle.borderRadius;
+      clone.style.backgroundColor = computedStyle.backgroundColor;
+      clone.style.boxShadow = computedStyle.boxShadow;
+
+      document.body.appendChild(clone);
+
+      // Force reflow
+      // eslint-disable-next-line @typescript-eslint/no-unused-expressions
+      clone.offsetHeight;
+
+      clone.style.transform = 'scale(0)';
+      clone.style.opacity = '0';
+
+      setTimeout(() => {
+        clone.remove();
+      }, 300);
+    }
+  }
+
+  private handleDropLogic(x: number, y: number, item: PositionItem) {
     const element = document.elementFromPoint(x, y);
     const nodeElement = element?.closest('[data-node-id]');
 
     if (nodeElement) {
       const nodeId = nodeElement.getAttribute('data-node-id');
       if (nodeId) {
-        console.log('Hit Test Detection: Dropped on Node', nodeId);
         this.store.addNode(nodeId, item);
         return;
       }

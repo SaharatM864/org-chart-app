@@ -8,6 +8,12 @@
   --color-background: var(--background);
   --color-foreground: var(--foreground);
 
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+
   --color-primary: var(--primary);
   --color-primary-foreground: var(--primary-foreground);
 
@@ -141,12 +147,12 @@ body {
 .figma-bg-dots {
   background-color: var(--chart-bg, var(--background));
 
-  background-image: radial-gradient(#d1d1d1 1px, transparent 1px);
+  background-image: radial-gradient(#d1d1d1 1.25px, transparent 1.25px);
   background-size: 20px 20px;
 }
 
 .dark .figma-bg-dots {
-  background-image: radial-gradient(#333333 1px, transparent 1px);
+  background-image: radial-gradient(#333333 1.25px, transparent 1.25px);
 }
 
 .glass-panel {
