@@ -98,7 +98,9 @@ import { ChartDragDropService } from './chart-drag-drop.service';
               [draggable]="isDraggable"
               [layout]="layoutDirection"
               [showMiniMap]="showMiniMap"
-              miniMapPosition="bottom-right"
+              [miniMapPosition]="miniMapPosition"
+              [miniMapWidth]="miniMapWidth"
+              [miniMapHeight]="miniMapHeight"
               [canDragNode]="canDragNode"
               [canDropNode]="canDropNode"
               (nodeDrop)="onNodeDrop($event)"
@@ -322,6 +324,9 @@ export class ChartViewComponent {
 
   layoutDirection: 'vertical' | 'horizontal' = 'vertical';
   showMiniMap = false;
+  miniMapWidth = 200;
+  miniMapHeight = 150;
+  miniMapPosition: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right' = 'bottom-right';
   isDraggable = true;
   isAllExpanded = true;
 

@@ -48,3 +48,5 @@ Thumbs.db
 .nx/
 .nx/workspace-data/
 .nx/cache/
+.gemini/
+gha-creds-*.json

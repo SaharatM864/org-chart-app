@@ -17,7 +17,7 @@ import { WorkerNode } from '../../data-access/org.model';
       Using bg-white/95 explicitly ensures stable background color.
     -->
     <div
-      class="group relative flex w-56 flex-col overflow-hidden rounded-xl border border-border bg-card p-4 text-card-foreground shadow-sm backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl dark:border-border/50 dark:shadow-none dark:hover:border-primary/50"
+      class="node-content group relative flex w-56 flex-col overflow-hidden rounded-xl border border-border bg-card p-4 text-card-foreground shadow-sm backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl dark:border-border/50 dark:shadow-none dark:hover:border-primary/50"
       [class.ring-2]="!!highlightType"
       [class.ring-primary]="highlightType === 'current'"
       [class.ring-green-500]="highlightType === 'parent'"
