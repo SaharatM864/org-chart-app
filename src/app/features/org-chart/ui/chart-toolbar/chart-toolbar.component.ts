@@ -14,6 +14,7 @@ import {
   lucideChevronsDown,
   lucideChevronsUp,
   lucidePanelRight,
+  lucideDices,
 } from '@ng-icons/lucide';
 
 @Component({
@@ -31,6 +32,7 @@ import {
       lucideChevronsDown,
       lucideChevronsUp,
       lucidePanelRight,
+      lucideDices,
     }),
   ],
   template: `
@@ -191,6 +193,25 @@ import {
           {{ isAllExpanded ? 'Collapse All' : 'Expand All' }}
         </span>
       </hlm-tooltip>
+
+      <div class="my-1 h-px bg-border"></div>
+
+      <hlm-tooltip class="block">
+        <button
+          hlmTooltipTrigger
+          position="left"
+          [showDelay]="300"
+          [hideDelay]="200"
+          [exitAnimationDuration]="300"
+          hlmBtn
+          variant="ghost"
+          size="icon"
+          (click)="generateRandom.emit()"
+        >
+          <ng-icon name="lucideDices" size="18"></ng-icon>
+        </button>
+        <span *brnTooltipContent class="side-tooltip"> Random Generate </span>
+      </hlm-tooltip>
     </div>
   `,
   styles: [
@@ -227,4 +248,5 @@ export class ChartToolbarComponent {
   @Output() toggleMiniMap = new EventEmitter<void>();
   @Output() toggleExpand = new EventEmitter<void>();
   @Output() toggleSidebar = new EventEmitter<void>();
+  @Output() generateRandom = new EventEmitter<void>();
 }

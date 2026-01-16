@@ -8,6 +8,7 @@ import { OrgStore } from '../../data-access/org.store';
 import { AddPositionDialogComponent } from '../../ui/dialogs/add-position-dialog.component';
 import { ConfirmDeleteDialogComponent } from '../../ui/dialogs/confirm-delete-dialog.component';
 import { ConfirmMoveNodeDialogComponent } from '../../ui/dialogs/confirm-move-node-dialog.component';
+import { ConfirmResetDialogComponent } from '../../ui/dialogs/confirm-reset-dialog.component';
 import { NodeCardComponent } from '../../ui/node-card/node-card.component';
 import { ChartViewSkeletonComponent } from '../../ui/chart-view-skeleton/chart-view-skeleton.component';
 import { PositionSidebarSkeletonComponent } from '../../ui/position-sidebar-skeleton/position-sidebar-skeleton.component';
@@ -32,6 +33,7 @@ import { ChartToolbarComponent } from '../../ui/chart-toolbar/chart-toolbar.comp
 import { PositionSidebarComponent } from '../../ui/position-sidebar/position-sidebar.component';
 import { EditPositionDialogComponent } from '../../ui/dialogs/edit-position-dialog.component';
 import { ThemeService } from '../../../../core/theme/theme.service';
+import { ChartDragDropService } from './chart-drag-drop.service';
 
 @Component({
   selector: 'app-chart-view',
@@ -51,6 +53,7 @@ import { ThemeService } from '../../../../core/theme/theme.service';
     SelectParentDialogComponent,
     ConfirmDeleteDialogComponent,
     ConfirmMoveNodeDialogComponent,
+    ConfirmResetDialogComponent,
     ChartToolbarComponent,
     PositionSidebarComponent,
     ChartViewSkeletonComponent,
@@ -79,6 +82,7 @@ import { ThemeService } from '../../../../core/theme/theme.service';
             (toggleMiniMap)="toggleMiniMap()"
             (toggleExpand)="onToggleExpand()"
             (toggleSidebar)="toggleSidebar()"
+            (generateRandom)="onGenerateRandom()"
           ></app-chart-toolbar>
         </div>
 
@@ -213,10 +217,20 @@ import { ThemeService } from '../../../../core/theme/theme.service';
       >
       </app-confirm-move-node-dialog>
     </hlm-alert-dialog>
+
+    <hlm-alert-dialog [state]="resetDialogState" (closed)="closeResetDialog()">
+      <app-confirm-reset-dialog
+        *brnAlertDialogContent="let ctx"
+        (onConfirm)="onConfirmReset()"
+        (onCancel)="closeResetDialog()"
+      >
+      </app-confirm-reset-dialog>
+    </hlm-alert-dialog>
   `,
 })
 export class ChartViewComponent {
   readonly store = inject(OrgStore);
+  private readonly _dragDropService = inject(ChartDragDropService);
   private readonly _elementRef = inject(ElementRef);
   private readonly _themeService = inject(ThemeService);
   private readonly _theme = toSignal(this._themeService.theme$);
@@ -226,6 +240,7 @@ export class ChartViewComponent {
   editNodeDialogState: 'open' | 'closed' = 'closed';
   selectParentDialogState: 'open' | 'closed' = 'closed';
   moveNodeDialogState: 'open' | 'closed' = 'closed';
+  resetDialogState: 'open' | 'closed' = 'closed';
   isSidebarOpen = true;
 
   deleteDialogState = {
@@ -427,93 +442,18 @@ export class ChartViewComponent {
 
   handleDragReleased(event: { item: PositionItem; event: CdkDragRelease }) {
     const { item, event: cdkEvent } = event;
-    const mouseEvent = cdkEvent.event;
-
-    let x, y;
-    if (mouseEvent instanceof MouseEvent) {
-      x = mouseEvent.clientX;
-      y = mouseEvent.clientY;
-    } else if (window.TouchEvent && mouseEvent instanceof TouchEvent) {
-      x = mouseEvent.changedTouches[0].clientX;
-      y = mouseEvent.changedTouches[0].clientY;
-    } else {
-      return;
-    }
-
-    // Check if we dropped over the main drop zone
     const mainDropZone = document.getElementById('main-drop-zone');
-    const elementAtPoint = document.elementFromPoint(x, y);
 
-    if (
-      mainDropZone &&
-      (mainDropZone.contains(elementAtPoint) || mainDropZone === elementAtPoint)
-    ) {
-      // Valid drop!
+    const result = this._dragDropService.handleDragReleased(cdkEvent, mainDropZone);
 
-      // 1. Run Animation
-      this.runDropAnimation();
-
-      // 2. Prevent CDK Return Animation (by hiding the preview)
-      const preview = document.querySelector('.cdk-drag-preview') as HTMLElement;
-      if (preview) {
-        preview.style.opacity = '0';
-        preview.style.display = 'none'; // Force hide
-      }
-
-      // 3. Execute Logic
-      this.handleDropLogic(x, y, item);
+    if (result.type === 'node') {
+      this.store.addNode(result.nodeId, item);
+    } else if (result.type === 'background') {
+      this.handleBackgroundDrop(item);
     }
   }
 
-  private runDropAnimation() {
-    const preview = document.querySelector('.cdk-drag-preview') as HTMLElement;
-    if (preview) {
-      const clone = preview.cloneNode(true) as HTMLElement;
-      const rect = preview.getBoundingClientRect();
-
-      clone.style.position = 'fixed';
-      clone.style.top = `${rect.top}px`;
-      clone.style.left = `${rect.left}px`;
-      clone.style.width = `${rect.width}px`;
-      clone.style.height = `${rect.height}px`;
-      clone.style.zIndex = '1000';
-      clone.style.transition = 'all 0.3s ease-out';
-      clone.style.pointerEvents = 'none';
-      clone.style.margin = '0';
-      clone.style.boxSizing = 'border-box';
-
-      const computedStyle = window.getComputedStyle(preview);
-      clone.style.borderRadius = computedStyle.borderRadius;
-      clone.style.backgroundColor = computedStyle.backgroundColor;
-      clone.style.boxShadow = computedStyle.boxShadow;
-
-      document.body.appendChild(clone);
-
-      // Force reflow
-      // eslint-disable-next-line @typescript-eslint/no-unused-expressions
-      clone.offsetHeight;
-
-      clone.style.transform = 'scale(0)';
-      clone.style.opacity = '0';
-
-      setTimeout(() => {
-        clone.remove();
-      }, 300);
-    }
-  }
-
-  private handleDropLogic(x: number, y: number, item: PositionItem) {
-    const element = document.elementFromPoint(x, y);
-    const nodeElement = element?.closest('[data-node-id]');
-
-    if (nodeElement) {
-      const nodeId = nodeElement.getAttribute('data-node-id');
-      if (nodeId) {
-        this.store.addNode(nodeId, item);
-        return;
-      }
-    }
-
+  private handleBackgroundDrop(item: PositionItem) {
     const allNodes = Object.values(this.store.nodeMap());
 
     if (allNodes.length === 0) {
@@ -661,5 +601,18 @@ export class ChartViewComponent {
 
   closeSidebar() {
     this.isSidebarOpen = false;
+  }
+
+  onGenerateRandom() {
+    this.resetDialogState = 'open';
+  }
+
+  closeResetDialog() {
+    this.resetDialogState = 'closed';
+  }
+
+  onConfirmReset() {
+    this.store.generateRandomChart();
+    this.closeResetDialog();
   }
 }
