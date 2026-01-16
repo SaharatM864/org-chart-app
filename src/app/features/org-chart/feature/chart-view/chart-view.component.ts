@@ -68,14 +68,14 @@ import { EditPositionDialogComponent } from '../../ui/dialogs/edit-position-dial
             [isDraggable]="isDraggable"
             [showMiniMap]="showMiniMap"
             [layoutDirection]="layoutDirection"
+            [isAllExpanded]="isAllExpanded"
             (zoomIn)="zoomIn()"
             (zoomOut)="zoomOut()"
             (resetView)="resetView()"
             (toggleDragAndDrop)="toggleDragAndDrop()"
             (switchLayout)="switchLayout()"
             (toggleMiniMap)="toggleMiniMap()"
-            (expandAll)="expandAll()"
-            (collapseAll)="collapseAll()"
+            (toggleExpand)="onToggleExpand()"
             (toggleSidebar)="toggleSidebar()"
           ></app-chart-toolbar>
         </div>
@@ -283,6 +283,7 @@ export class ChartViewComponent {
   layoutDirection: 'vertical' | 'horizontal' = 'vertical';
   showMiniMap = false;
   isDraggable = true;
+  isAllExpanded = true;
 
   ngOnInit() {
     this.store.loadChart();
@@ -572,6 +573,16 @@ export class ChartViewComponent {
 
   toggleMiniMap() {
     this.showMiniMap = !this.showMiniMap;
+  }
+
+  onToggleExpand() {
+    if (this.isAllExpanded) {
+      this.collapseAll();
+      this.isAllExpanded = false;
+    } else {
+      this.expandAll();
+      this.isAllExpanded = true;
+    }
   }
 
   expandAll() {

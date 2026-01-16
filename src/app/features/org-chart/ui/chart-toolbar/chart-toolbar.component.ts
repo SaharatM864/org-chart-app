@@ -180,28 +180,16 @@ import {
           hlmBtn
           variant="ghost"
           size="icon"
-          (click)="expandAll.emit()"
+          (click)="toggleExpand.emit()"
         >
-          <ng-icon name="lucideChevronsDown" size="18"></ng-icon>
+          <ng-icon
+            [name]="isAllExpanded ? 'lucideChevronsUp' : 'lucideChevronsDown'"
+            size="18"
+          ></ng-icon>
         </button>
-        <span *brnTooltipContent class="side-tooltip"> Expand All </span>
-      </hlm-tooltip>
-
-      <hlm-tooltip class="block">
-        <button
-          hlmTooltipTrigger
-          position="left"
-          [showDelay]="300"
-          [hideDelay]="200"
-          [exitAnimationDuration]="300"
-          hlmBtn
-          variant="ghost"
-          size="icon"
-          (click)="collapseAll.emit()"
-        >
-          <ng-icon name="lucideChevronsUp" size="18"></ng-icon>
-        </button>
-        <span *brnTooltipContent class="side-tooltip"> Collapse All </span>
+        <span *brnTooltipContent class="side-tooltip">
+          {{ isAllExpanded ? 'Collapse All' : 'Expand All' }}
+        </span>
       </hlm-tooltip>
     </div>
   `,
@@ -229,6 +217,7 @@ export class ChartToolbarComponent {
   @Input() isDraggable = true;
   @Input() showMiniMap = false;
   @Input() layoutDirection: 'vertical' | 'horizontal' = 'vertical';
+  @Input() isAllExpanded = true;
 
   @Output() zoomIn = new EventEmitter<void>();
   @Output() zoomOut = new EventEmitter<void>();
@@ -236,7 +225,6 @@ export class ChartToolbarComponent {
   @Output() toggleDragAndDrop = new EventEmitter<void>();
   @Output() switchLayout = new EventEmitter<void>();
   @Output() toggleMiniMap = new EventEmitter<void>();
-  @Output() expandAll = new EventEmitter<void>();
-  @Output() collapseAll = new EventEmitter<void>();
+  @Output() toggleExpand = new EventEmitter<void>();
   @Output() toggleSidebar = new EventEmitter<void>();
 }
