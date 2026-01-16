@@ -12,7 +12,7 @@ import { HlmButton } from '@spartan-ng/helm/button';
   providers: [provideIcons({ lucideLayoutGrid, lucidePlus })],
   template: `
     <aside
-      class="bg-card flex h-full w-80 flex-col gap-4 overflow-y-auto border-r border-border p-4"
+      class="flex h-full w-80 flex-col gap-4 overflow-y-auto border-r border-border bg-card p-4"
     >
       <div class="flex items-center justify-between">
         <h2 class="flex items-center gap-2 text-xl font-bold">
@@ -30,7 +30,7 @@ import { HlmButton } from '@spartan-ng/helm/button';
         <!-- Skeleton Items -->
         <div
           *ngFor="let i of [1, 2, 3, 4, 5]"
-          class="bg-card flex flex-row items-center justify-between gap-3 rounded-lg border border-border p-3 shadow-sm"
+          class="flex flex-row items-center justify-between gap-3 rounded-lg border border-border bg-card p-3 shadow-sm"
         >
           <div class="flex w-full items-center gap-3">
             <!-- Grip Handle -->

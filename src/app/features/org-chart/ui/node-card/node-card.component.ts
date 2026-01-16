@@ -46,7 +46,7 @@ import { WorkerNode } from '../../data-access/org.model';
 
       <div class="flex items-start gap-4">
         <div
-          class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-linear-to-br from-gray-100 to-gray-200 text-gray-600 shadow-inner dark:border dark:border-zinc-700 dark:from-zinc-800 dark:to-zinc-700 dark:text-zinc-300 dark:shadow-none"
+          class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-linear-to-br from-zinc-100 to-zinc-200 text-zinc-600 shadow-inner dark:border dark:border-zinc-700 dark:from-zinc-800 dark:to-zinc-700 dark:text-zinc-300 dark:shadow-none"
           [class.from-primary-100]="highlightType === 'current'"
           [class.dark:from-primary-900/50]="highlightType === 'current'"
           [class.to-primary-200]="highlightType === 'current'"
@@ -71,7 +71,7 @@ import { WorkerNode } from '../../data-access/org.model';
 
       <div class="mt-3 flex items-center justify-between border-t border-border/40 pt-2">
         <span
-          class="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-0.5 text-[10px] font-medium text-slate-700 dark:bg-slate-800 dark:text-slate-300"
+          class="inline-flex items-center rounded-full bg-zinc-100 px-2.5 py-0.5 text-[10px] font-medium text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300"
         >
           Lvl {{ node.level }}
         </span>
@@ -96,11 +96,11 @@ export class NodeCardComponent {
   get salaryTypeClasses(): string {
     switch (this.node.salaryType) {
       case 'Management':
-        return 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300';
+        return 'bg-purple-100 text-purple-700 dark:bg-purple-900/50 dark:text-purple-300';
       case 'Admin':
-        return 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300';
+        return 'bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300';
       default:
-        return 'bg-gray-100 text-gray-600 dark:bg-zinc-800 dark:text-zinc-400';
+        return 'bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400';
     }
   }
 

@@ -10,20 +10,28 @@ import { CommonModule } from '@angular/common';
       <div class="space-y-4">
         <h1 class="text-3xl font-bold tracking-tight">Dashboard</h1>
         <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          <div class="bg-card text-card-foreground rounded-xl border p-6 shadow-sm">
+          <div
+            class="rounded-xl border bg-card p-6 text-card-foreground shadow-sm dark:shadow-none"
+          >
             <div class="text-sm font-medium text-muted-foreground">Total Employees</div>
             <div class="mt-2 text-2xl font-bold">1,234</div>
             <div class="mt-1 text-xs text-muted-foreground">+20.1% from last month</div>
           </div>
-          <div class="bg-card text-card-foreground rounded-xl border p-6 shadow-sm">
+          <div
+            class="rounded-xl border bg-card p-6 text-card-foreground shadow-sm dark:shadow-none"
+          >
             <div class="text-sm font-medium text-muted-foreground">Departments</div>
             <div class="mt-2 text-2xl font-bold">15</div>
           </div>
-          <div class="bg-card text-card-foreground rounded-xl border p-6 shadow-sm">
+          <div
+            class="rounded-xl border bg-card p-6 text-card-foreground shadow-sm dark:shadow-none"
+          >
             <div class="text-sm font-medium text-muted-foreground">Active Roles</div>
             <div class="mt-2 text-2xl font-bold">42</div>
           </div>
-          <div class="bg-card text-card-foreground rounded-xl border p-6 shadow-sm">
+          <div
+            class="rounded-xl border bg-card p-6 text-card-foreground shadow-sm dark:shadow-none"
+          >
             <div class="text-sm font-medium text-muted-foreground">Pending Reviews</div>
             <div class="mt-2 text-2xl font-bold">7</div>
           </div>

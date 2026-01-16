@@ -1,4 +1,5 @@
 import { Component, computed, inject, ViewChild, effect, ElementRef } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { CdkDragDrop, CdkDragRelease, DragDropModule } from '@angular/cdk/drag-drop';
 
@@ -30,6 +31,7 @@ import { SelectParentDialogComponent } from '../../ui/dialogs/select-parent-dial
 import { ChartToolbarComponent } from '../../ui/chart-toolbar/chart-toolbar.component';
 import { PositionSidebarComponent } from '../../ui/position-sidebar/position-sidebar.component';
 import { EditPositionDialogComponent } from '../../ui/dialogs/edit-position-dialog.component';
+import { ThemeService } from '../../../../core/theme/theme.service';
 
 @Component({
   selector: 'app-chart-view',
@@ -58,7 +60,7 @@ import { EditPositionDialogComponent } from '../../ui/dialogs/edit-position-dial
     <div class="flex h-full w-full bg-background text-foreground" cdkDropListGroup>
       <main
         class="figma-bg-dots relative flex-1 overflow-hidden"
-        style="--chart-bg: #f5f5f5;"
+        style="--chart-bg: var(--muted);"
         id="main-drop-zone"
         cdkDropList
         (cdkDropListDropped)="onBackgroundDrop($event)"
@@ -216,6 +218,8 @@ import { EditPositionDialogComponent } from '../../ui/dialogs/edit-position-dial
 export class ChartViewComponent {
   readonly store = inject(OrgStore);
   private readonly _elementRef = inject(ElementRef);
+  private readonly _themeService = inject(ThemeService);
+  private readonly _theme = toSignal(this._themeService.theme$);
 
   addDialogState: 'open' | 'closed' = 'closed';
   editDialogState: 'open' | 'closed' = 'closed';
@@ -259,6 +263,27 @@ export class ChartViewComponent {
 
       if (map.size === 0) return;
     });
+
+    effect(() => {
+      const theme = this._theme();
+      if (theme === 'dark') {
+        this.themeOptions = {
+          ...this.themeOptions,
+          connector: {
+            color: '#52525b', // zinc-600
+            activeColor: '#60a5fa', // blue-400
+          },
+        };
+      } else {
+        this.themeOptions = {
+          ...this.themeOptions,
+          connector: {
+            color: '#d1d5db', // gray-300
+            activeColor: '#3b82f6', // blue-500
+          },
+        };
+      }
+    });
   }
 
   chartData = computed(() => {
@@ -275,8 +300,8 @@ export class ChartViewComponent {
       padding: '0',
     },
     connector: {
-      color: 'var(--border)',
-      activeColor: 'var(--primary)',
+      color: '#d1d5db',
+      activeColor: '#3b82f6',
     },
   };
 

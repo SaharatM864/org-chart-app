@@ -22,7 +22,7 @@ import { lucideGripVertical, lucidePencil } from '@ng-icons/lucide';
   template: `
     <div
       hlmCard
-      class="bg-card flex flex-row items-center justify-between gap-3 rounded-lg border border-border p-3 shadow-sm hover:border-primary/50 hover:shadow-md"
+      class="flex flex-row items-center justify-between gap-3 rounded-lg border border-border bg-card p-3 shadow-sm hover:border-primary/50 hover:shadow-md"
     >
       <div class="flex items-center gap-3">
         <ng-icon
