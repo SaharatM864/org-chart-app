@@ -145,3 +145,27 @@ body {
 .cdk-drop-list-dragging .example-box:not(.cdk-drag-placeholder) {
   transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
 }
+
+/* Custom Background Patterns */
+.figma-bg-dots {
+  background-color: var(--background);
+  /* Default Light Mode Dot Pattern (Gray dots) */
+  background-image: radial-gradient(#d1d1d1 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+
+.dark .figma-bg-dots {
+  /* Dark Mode Dot Pattern (Darker dots) */
+  background-image: radial-gradient(#333333 1px, transparent 1px);
+}
+
+/* Glassmorphism Panel */
+.glass-panel {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+.dark .glass-panel {
+  background: rgba(30, 30, 30, 0.7);
+}

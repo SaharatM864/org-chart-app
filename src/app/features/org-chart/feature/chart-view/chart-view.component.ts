@@ -87,7 +87,7 @@ import { SelectParentDialogComponent } from '../../ui/dialogs/select-parent-dial
         <div class="absolute top-4 right-4 z-10 flex flex-col gap-2">
           <!-- Toolbar Group -->
           <div
-            class="flex flex-col gap-1 rounded-lg border bg-background/95 p-1 shadow-sm backdrop-blur supports-backdrop-filter:bg-background/60"
+            class="glass-panel flex flex-col gap-1 rounded-lg border border-border/50 p-1 shadow-sm"
           >
             <hlm-tooltip class="block">
               <button
@@ -486,7 +486,7 @@ export class ChartViewComponent {
 
   themeOptions: NgxInteractiveOrgChartTheme = {
     node: {
-      background: 'transparent',
+      background: '#FFFFFF',
       shadow: 'none',
       borderRadius: '0',
       outlineColor: 'transparent',
