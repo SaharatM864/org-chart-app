@@ -8,13 +8,13 @@ import { HlmSkeletonImports } from '@spartan-ng/helm/skeleton';
   imports: [CommonModule, HlmSkeletonImports],
   template: `
     <div
-      class="text-card-foreground relative flex w-56 flex-col overflow-hidden rounded-xl border border-l-[6px] border-border bg-white/95 p-4 shadow-sm dark:bg-zinc-900/95"
+      class="relative flex w-56 flex-col overflow-hidden rounded-xl border border-border bg-card p-4 text-card-foreground shadow-sm backdrop-blur-sm"
     >
       <div class="flex items-start gap-4">
         <!-- Avatar Skeleton -->
         <hlm-skeleton class="size-10 shrink-0 rounded-full bg-muted" />
 
-        <div class="flex min-w-0 flex-1 flex-col gap-2">
+        <div class="flex min-w-0 flex-1 flex-col gap-1.5">
           <!-- Name Skeleton -->
           <hlm-skeleton class="h-4 w-3/4 rounded-md bg-muted" />
           <!-- Position/Section Skeleton -->
@@ -30,7 +30,7 @@ import { HlmSkeletonImports } from '@spartan-ng/helm/skeleton';
         <!-- Level Badge Skeleton -->
         <hlm-skeleton class="h-5 w-12 rounded-full bg-muted" />
         <!-- Salary Type Skeleton -->
-        <hlm-skeleton class="h-3 w-10 rounded-md bg-muted" />
+        <hlm-skeleton class="h-3 w-10 rounded-full bg-muted" />
       </div>
     </div>
   `,
