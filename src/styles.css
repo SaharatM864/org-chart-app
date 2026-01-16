@@ -148,7 +148,7 @@ body {
 
 /* Custom Background Patterns */
 .figma-bg-dots {
-  background-color: var(--background);
+  background-color: var(--chart-bg, var(--background));
   /* Default Light Mode Dot Pattern (Gray dots) */
   background-image: radial-gradient(#d1d1d1 1px, transparent 1px);
   background-size: 20px 20px;

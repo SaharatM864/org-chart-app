@@ -15,7 +15,6 @@ import { BrnNavigationMenuImports } from '@spartan-ng/brain/navigation-menu';
 import { HlmNavigationMenuImports } from '@spartan-ng/helm/navigation-menu';
 import { HlmIconImports } from '@spartan-ng/helm/icon';
 import { HlmButton } from '@spartan-ng/helm/button';
-import { LanguageSwitcherComponent } from '../../../shared/ui/language-switcher/language-switcher.component';
 
 @Component({
   selector: 'app-main-layout',
@@ -28,7 +27,6 @@ import { LanguageSwitcherComponent } from '../../../shared/ui/language-switcher/
     ...BrnNavigationMenuImports,
     ...HlmIconImports,
     HlmButton,
-    LanguageSwitcherComponent,
   ],
   providers: [
     provideIcons({

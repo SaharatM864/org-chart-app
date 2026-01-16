@@ -53,6 +53,7 @@ import { EditPositionDialogComponent } from '../../ui/dialogs/edit-position-dial
       <!-- Main Chart Area -->
       <main
         class="figma-bg-dots relative flex-1 overflow-hidden"
+        style="--chart-bg: #f5f5f5;"
         id="main-drop-zone"
         cdkDropList
         (cdkDropListDropped)="onBackgroundDrop($event)"
@@ -225,7 +226,7 @@ export class ChartViewComponent {
 
   themeOptions: NgxInteractiveOrgChartTheme = {
     node: {
-      background: '#FFFFFF',
+      background: 'transparent',
       shadow: 'none',
       borderRadius: '0',
       outlineColor: 'transparent',
