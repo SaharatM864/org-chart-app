@@ -7,6 +7,8 @@ import { OrgStore } from '../../data-access/org.store';
 import { AddPositionDialogComponent } from '../../ui/dialogs/add-position-dialog.component';
 import { ConfirmDeleteDialogComponent } from '../../ui/dialogs/confirm-delete-dialog.component';
 import { NodeCardComponent } from '../../ui/node-card/node-card.component';
+import { ChartViewSkeletonComponent } from '../../ui/chart-view-skeleton/chart-view-skeleton.component';
+import { PositionSidebarSkeletonComponent } from '../../ui/position-sidebar-skeleton/position-sidebar-skeleton.component';
 import { EditNodeDialogComponent } from '../../ui/dialogs/edit-node-dialog.component';
 import { transformToOrgChartNode } from '../../utils/org-chart-adapter';
 import { HlmDialog } from '@spartan-ng/helm/dialog';
@@ -39,15 +41,20 @@ import { EditPositionDialogComponent } from '../../ui/dialogs/edit-position-dial
     ConfirmDeleteDialogComponent,
     ChartToolbarComponent,
     PositionSidebarComponent,
+    ChartViewSkeletonComponent,
+    PositionSidebarSkeletonComponent,
   ],
   template: `
     <div class="flex h-full w-full bg-background text-foreground" cdkDropListGroup>
-      <app-position-sidebar
-        [positions]="store.sidebarPositions()"
-        (addPosition)="openAddPositionDialog()"
-        (editPosition)="openEditPositionDialog($event)"
-        (reorder)="onSidebarReorder($event)"
-      ></app-position-sidebar>
+      <app-position-sidebar-skeleton *ngIf="store.isLoading(); else sidebar" />
+      <ng-template #sidebar>
+        <app-position-sidebar
+          [positions]="store.sidebarPositions()"
+          (addPosition)="openAddPositionDialog()"
+          (editPosition)="openEditPositionDialog($event)"
+          (reorder)="onSidebarReorder($event)"
+        ></app-position-sidebar>
+      </ng-template>
 
       <main
         class="figma-bg-dots relative flex-1 overflow-hidden"
@@ -72,41 +79,45 @@ import { EditPositionDialogComponent } from '../../ui/dialogs/edit-position-dial
           ></app-chart-toolbar>
         </div>
 
-        <ng-container *ngIf="chartData() as rootNode; else noData">
-          <ngx-interactive-org-chart
-            #orgChart
-            class="block h-full w-full"
-            [data]="rootNode"
-            [themeOptions]="themeOptions"
-            [draggable]="isDraggable"
-            [layout]="layoutDirection"
-            [showMiniMap]="showMiniMap"
-            miniMapPosition="bottom-right"
-            [canDragNode]="canDragNode"
-            [canDropNode]="canDropNode"
-            (nodeDrop)="onNodeDrop($event)"
-          >
-            <ng-template #nodeTemplate let-node>
-              <app-node-card
-                [node]="node.data"
-                [highlightType]="store.highlightedIds().get(node.id) || null"
-                (delete)="onDeleteNode($event)"
-                (edit)="onEditNode($event)"
-                (highlight)="store.setHighlight($event)"
-                (unhighlight)="store.setHighlight(null)"
-              >
-              </app-node-card>
-            </ng-template>
-          </ngx-interactive-org-chart>
-        </ng-container>
+        <app-chart-view-skeleton *ngIf="store.isLoading(); else content" />
 
-        <ng-template #noData>
-          <div class="flex h-full w-full items-center justify-center text-muted-foreground">
-            <div class="text-center">
-              <p class="text-lg font-medium">No Organization Data</p>
-              <p class="text-sm">Create a root node or import data to get started.</p>
+        <ng-template #content>
+          <ng-container *ngIf="chartData() as rootNode; else noData">
+            <ngx-interactive-org-chart
+              #orgChart
+              class="block h-full w-full"
+              [data]="rootNode"
+              [themeOptions]="themeOptions"
+              [draggable]="isDraggable"
+              [layout]="layoutDirection"
+              [showMiniMap]="showMiniMap"
+              miniMapPosition="bottom-right"
+              [canDragNode]="canDragNode"
+              [canDropNode]="canDropNode"
+              (nodeDrop)="onNodeDrop($event)"
+            >
+              <ng-template #nodeTemplate let-node>
+                <app-node-card
+                  [node]="node.data"
+                  [highlightType]="store.highlightedIds().get(node.id) || null"
+                  (delete)="onDeleteNode($event)"
+                  (edit)="onEditNode($event)"
+                  (highlight)="store.setHighlight($event)"
+                  (unhighlight)="store.setHighlight(null)"
+                >
+                </app-node-card>
+              </ng-template>
+            </ngx-interactive-org-chart>
+          </ng-container>
+
+          <ng-template #noData>
+            <div class="flex h-full w-full items-center justify-center text-muted-foreground">
+              <div class="text-center">
+                <p class="text-lg font-medium">No Organization Data</p>
+                <p class="text-sm">Create a root node or import data to get started.</p>
+              </div>
             </div>
-          </div>
+          </ng-template>
         </ng-template>
       </main>
 
