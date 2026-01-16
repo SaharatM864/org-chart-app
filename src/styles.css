@@ -38,7 +38,7 @@
 }
 
 :root {
-  color-scheme: light;
+  color-scheme: light dark;
 
   --font-en: 'Inter', 'Carlito', sans-serif;
   --font-th: 'Noto Sans Thai', 'Inter', 'Carlito', sans-serif;
