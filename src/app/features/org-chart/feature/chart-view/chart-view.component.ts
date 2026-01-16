@@ -1,19 +1,15 @@
 import { Component, computed, inject, ViewChild, effect, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { CdkDragDrop, DragDropModule } from '@angular/cdk/drag-drop';
+
 import { BrnDialogContent } from '@spartan-ng/brain/dialog';
-import { BrnTooltipImports } from '@spartan-ng/brain/tooltip';
 import { OrgStore } from '../../data-access/org.store';
-import { PositionItemComponent } from '../../ui/position-item/position-item.component';
 import { AddPositionDialogComponent } from '../../ui/dialogs/add-position-dialog.component';
-import { EditPositionDialogComponent } from '../../ui/dialogs/edit-position-dialog.component';
 import { ConfirmDeleteDialogComponent } from '../../ui/dialogs/confirm-delete-dialog.component';
 import { NodeCardComponent } from '../../ui/node-card/node-card.component';
+import { EditNodeDialogComponent } from '../../ui/dialogs/edit-node-dialog.component';
 import { transformToOrgChartNode } from '../../utils/org-chart-adapter';
-import { HlmButton } from '@spartan-ng/helm/button';
 import { HlmDialog } from '@spartan-ng/helm/dialog';
-import { HlmTooltipImports } from '@spartan-ng/helm/tooltip';
-import { NgIconComponent } from '@ng-icons/core';
 // eslint-disable-next-line @nx/enforce-module-boundaries
 import {
   NgxInteractiveOrgChart,
@@ -22,6 +18,9 @@ import {
 } from 'ngx-interactive-org-chart';
 import { PositionFormData, PositionItem, WorkerNode } from '../../data-access/org.model';
 import { SelectParentDialogComponent } from '../../ui/dialogs/select-parent-dialog.component';
+import { ChartToolbarComponent } from '../../ui/chart-toolbar/chart-toolbar.component';
+import { PositionSidebarComponent } from '../../ui/position-sidebar/position-sidebar.component';
+import { EditPositionDialogComponent } from '../../ui/dialogs/edit-position-dialog.component';
 
 @Component({
   selector: 'app-chart-view',
@@ -29,53 +28,27 @@ import { SelectParentDialogComponent } from '../../ui/dialogs/select-parent-dial
   imports: [
     CommonModule,
     DragDropModule,
-    PositionItemComponent,
     NodeCardComponent,
     NgxInteractiveOrgChart,
-    HlmButton,
-    NgIconComponent,
     BrnDialogContent,
     HlmDialog,
-    BrnTooltipImports,
-    HlmTooltipImports,
     AddPositionDialogComponent,
     EditPositionDialogComponent,
+    EditNodeDialogComponent,
     SelectParentDialogComponent,
     ConfirmDeleteDialogComponent,
+    ChartToolbarComponent,
+    PositionSidebarComponent,
   ],
-  providers: [],
   template: `
     <div class="flex h-full w-full bg-background text-foreground" cdkDropListGroup>
-      <!-- Sidebar / Position List -->
-      <aside class="bg-card flex w-80 flex-col gap-4 overflow-y-auto border-r border-border p-4">
-        <div class="flex items-center justify-between">
-          <h2 class="flex items-center gap-2 text-xl font-bold">
-            <ng-icon name="lucideLayoutGrid"></ng-icon>
-            Positions
-          </h2>
-          <button hlmBtn variant="outline" size="sm" (click)="openAddPositionDialog()">
-            <ng-icon name="lucidePlus" size="16"></ng-icon>
-          </button>
-        </div>
-
-        <p class="text-xs text-muted-foreground">Drag positions from here to add new nodes.</p>
-
-        <div
-          cdkDropList
-          [cdkDropListData]="store.sidebarPositions()"
-          class="flex min-h-25 flex-col gap-2"
-          (cdkDropListDropped)="onSidebarDrop($event)"
-        >
-          <app-position-item
-            *ngFor="let item of store.sidebarPositions()"
-            [item]="item"
-            cdkDrag
-            [cdkDragData]="item"
-            (cdkDragStarted)="onDragStarted()"
-            (edit)="openEditPositionDialog($event)"
-          ></app-position-item>
-        </div>
-      </aside>
+      <!-- Refactored Sidebar -->
+      <app-position-sidebar
+        [positions]="store.sidebarPositions()"
+        (addPosition)="openAddPositionDialog()"
+        (editPosition)="openEditPositionDialog($event)"
+        (reorder)="onSidebarReorder($event)"
+      ></app-position-sidebar>
 
       <!-- Main Chart Area -->
       <main
@@ -85,262 +58,20 @@ import { SelectParentDialogComponent } from '../../ui/dialogs/select-parent-dial
         (cdkDropListDropped)="onBackgroundDrop($event)"
       >
         <div class="absolute top-4 right-4 z-10 flex flex-col gap-2">
-          <!-- Toolbar Group -->
-          <div
-            class="glass-panel flex flex-col gap-1 rounded-lg border border-border/50 p-1 shadow-sm"
-          >
-            <hlm-tooltip class="block">
-              <button
-                hlmTooltipTrigger
-                position="left"
-                [showDelay]="300"
-                [hideDelay]="200"
-                [exitAnimationDuration]="300"
-                hlmBtn
-                variant="ghost"
-                size="icon"
-                (click)="zoomIn()"
-              >
-                <ng-icon name="lucidePlus" size="18"></ng-icon>
-              </button>
-              <span *brnTooltipContent class="relative flex items-center">
-                Zoom In
-                <span class="absolute top-1/2 -right-2 -translate-y-1/2 -rotate-90">
-                  <svg
-                    class="block fill-primary"
-                    width="12"
-                    height="6"
-                    viewBox="0 0 30 10"
-                    preserveAspectRatio="none"
-                  >
-                    <polygon points="0,0 30,0 15,10"></polygon>
-                  </svg>
-                </span>
-              </span>
-            </hlm-tooltip>
-
-            <hlm-tooltip class="block">
-              <button
-                hlmTooltipTrigger
-                position="left"
-                [showDelay]="300"
-                [hideDelay]="200"
-                [exitAnimationDuration]="300"
-                hlmBtn
-                variant="ghost"
-                size="icon"
-                (click)="zoomOut()"
-              >
-                <ng-icon name="lucideMinus" size="18"></ng-icon>
-              </button>
-              <span *brnTooltipContent class="relative flex items-center">
-                Zoom Out
-                <span class="absolute top-1/2 -right-2 -translate-y-1/2 -rotate-90">
-                  <svg
-                    class="block fill-primary"
-                    width="12"
-                    height="6"
-                    viewBox="0 0 30 10"
-                    preserveAspectRatio="none"
-                  >
-                    <polygon points="0,0 30,0 15,10"></polygon>
-                  </svg>
-                </span>
-              </span>
-            </hlm-tooltip>
-
-            <hlm-tooltip class="block">
-              <button
-                hlmTooltipTrigger
-                position="left"
-                [showDelay]="300"
-                [hideDelay]="200"
-                [exitAnimationDuration]="300"
-                hlmBtn
-                variant="ghost"
-                size="icon"
-                (click)="resetView()"
-              >
-                <ng-icon name="lucideRotateCcw" size="18"></ng-icon>
-              </button>
-              <span *brnTooltipContent class="relative flex items-center">
-                Reset View
-                <span class="absolute top-1/2 -right-2 -translate-y-1/2 -rotate-90">
-                  <svg
-                    class="block fill-primary"
-                    width="12"
-                    height="6"
-                    viewBox="0 0 30 10"
-                    preserveAspectRatio="none"
-                  >
-                    <polygon points="0,0 30,0 15,10"></polygon>
-                  </svg>
-                </span>
-              </span>
-            </hlm-tooltip>
-
-            <div class="my-1 h-px bg-border"></div>
-
-            <hlm-tooltip class="block">
-              <button
-                hlmTooltipTrigger
-                position="left"
-                [showDelay]="300"
-                [hideDelay]="200"
-                [exitAnimationDuration]="300"
-                hlmBtn
-                variant="ghost"
-                size="icon"
-                (click)="toggleDragAndDrop()"
-                [class.bg-accent]="isDraggable"
-              >
-                <ng-icon name="lucideMove" size="18"></ng-icon>
-              </button>
-              <span *brnTooltipContent class="relative flex items-center">
-                {{ isDraggable ? 'Disable Drag & Drop' : 'Enable Drag & Drop' }}
-                <span class="absolute top-1/2 -right-2 -translate-y-1/2 -rotate-90">
-                  <svg
-                    class="block fill-primary"
-                    width="12"
-                    height="6"
-                    viewBox="0 0 30 10"
-                    preserveAspectRatio="none"
-                  >
-                    <polygon points="0,0 30,0 15,10"></polygon>
-                  </svg>
-                </span>
-              </span>
-            </hlm-tooltip>
-
-            <div class="my-1 h-px bg-border"></div>
-
-            <hlm-tooltip class="block">
-              <button
-                hlmTooltipTrigger
-                position="left"
-                [showDelay]="300"
-                [hideDelay]="200"
-                [exitAnimationDuration]="300"
-                hlmBtn
-                variant="ghost"
-                size="icon"
-                (click)="switchLayout()"
-              >
-                <ng-icon
-                  name="lucideArrowRightLeft"
-                  size="18"
-                  [class.rotate-90]="layoutDirection === 'vertical'"
-                ></ng-icon>
-              </button>
-              <span *brnTooltipContent class="relative flex items-center">
-                Toggle Layout
-                <span class="absolute top-1/2 -right-2 -translate-y-1/2 -rotate-90">
-                  <svg
-                    class="block fill-primary"
-                    width="12"
-                    height="6"
-                    viewBox="0 0 30 10"
-                    preserveAspectRatio="none"
-                  >
-                    <polygon points="0,0 30,0 15,10"></polygon>
-                  </svg>
-                </span>
-              </span>
-            </hlm-tooltip>
-
-            <hlm-tooltip class="block">
-              <button
-                hlmTooltipTrigger
-                position="left"
-                [showDelay]="300"
-                [hideDelay]="200"
-                [exitAnimationDuration]="300"
-                hlmBtn
-                variant="ghost"
-                size="icon"
-                (click)="toggleMiniMap()"
-                [class.bg-accent]="showMiniMap"
-              >
-                <ng-icon name="lucideMap" size="18"></ng-icon>
-              </button>
-              <span *brnTooltipContent class="relative flex items-center">
-                Toggle Mini Map
-                <span class="absolute top-1/2 -right-2 -translate-y-1/2 -rotate-90">
-                  <svg
-                    class="block fill-primary"
-                    width="12"
-                    height="6"
-                    viewBox="0 0 30 10"
-                    preserveAspectRatio="none"
-                  >
-                    <polygon points="0,0 30,0 15,10"></polygon>
-                  </svg>
-                </span>
-              </span>
-            </hlm-tooltip>
-
-            <div class="my-1 h-px bg-border"></div>
-
-            <hlm-tooltip class="block">
-              <button
-                hlmTooltipTrigger
-                position="left"
-                [showDelay]="300"
-                [hideDelay]="200"
-                [exitAnimationDuration]="300"
-                hlmBtn
-                variant="ghost"
-                size="icon"
-                (click)="expandAll()"
-              >
-                <ng-icon name="lucideChevronsDown" size="18"></ng-icon>
-              </button>
-              <span *brnTooltipContent class="relative flex items-center">
-                Expand All
-                <span class="absolute top-1/2 -right-2 -translate-y-1/2 -rotate-90">
-                  <svg
-                    class="block fill-primary"
-                    width="12"
-                    height="6"
-                    viewBox="0 0 30 10"
-                    preserveAspectRatio="none"
-                  >
-                    <polygon points="0,0 30,0 15,10"></polygon>
-                  </svg>
-                </span>
-              </span>
-            </hlm-tooltip>
-
-            <hlm-tooltip class="block">
-              <button
-                hlmTooltipTrigger
-                position="left"
-                [showDelay]="300"
-                [hideDelay]="200"
-                [exitAnimationDuration]="300"
-                hlmBtn
-                variant="ghost"
-                size="icon"
-                (click)="collapseAll()"
-              >
-                <ng-icon name="lucideChevronsUp" size="18"></ng-icon>
-              </button>
-              <span *brnTooltipContent class="relative flex items-center">
-                Collapse All
-                <span class="absolute top-1/2 -right-2 -translate-y-1/2 -rotate-90">
-                  <svg
-                    class="block fill-primary"
-                    width="12"
-                    height="6"
-                    viewBox="0 0 30 10"
-                    preserveAspectRatio="none"
-                  >
-                    <polygon points="0,0 30,0 15,10"></polygon>
-                  </svg>
-                </span>
-              </span>
-            </hlm-tooltip>
-          </div>
+          <!-- Refactored Toolbar -->
+          <app-chart-toolbar
+            [isDraggable]="isDraggable"
+            [showMiniMap]="showMiniMap"
+            [layoutDirection]="layoutDirection"
+            (zoomIn)="zoomIn()"
+            (zoomOut)="zoomOut()"
+            (resetView)="resetView()"
+            (toggleDragAndDrop)="toggleDragAndDrop()"
+            (switchLayout)="switchLayout()"
+            (toggleMiniMap)="toggleMiniMap()"
+            (expandAll)="expandAll()"
+            (collapseAll)="collapseAll()"
+          ></app-chart-toolbar>
         </div>
 
         <ng-container *ngIf="chartData() as rootNode; else noData">
@@ -362,6 +93,7 @@ import { SelectParentDialogComponent } from '../../ui/dialogs/select-parent-dial
                 [node]="node.data"
                 [highlightType]="store.highlightedIds().get(node.id) || null"
                 (delete)="onDeleteNode($event)"
+                (edit)="onEditNode($event)"
                 (highlight)="store.setHighlight($event)"
                 (unhighlight)="store.setHighlight(null)"
               >
@@ -401,7 +133,6 @@ import { SelectParentDialogComponent } from '../../ui/dialogs/select-parent-dial
 
     <!-- Dialogs -->
 
-    <!-- Add Position Dialog -->
     <hlm-dialog [state]="addDialogState" (closed)="closeAddPositionDialog()">
       <app-add-position-dialog
         *brnDialogContent="let ctx"
@@ -411,7 +142,6 @@ import { SelectParentDialogComponent } from '../../ui/dialogs/select-parent-dial
       </app-add-position-dialog>
     </hlm-dialog>
 
-    <!-- Edit Position Dialog -->
     <hlm-dialog [state]="editDialogState" (closed)="closeEditPositionDialog()">
       <app-edit-position-dialog
         *brnDialogContent="let ctx"
@@ -422,7 +152,16 @@ import { SelectParentDialogComponent } from '../../ui/dialogs/select-parent-dial
       </app-edit-position-dialog>
     </hlm-dialog>
 
-    <!-- Select Parent Dialog -->
+    <hlm-dialog [state]="editNodeDialogState" (closed)="closeEditNodeDialog()">
+      <app-edit-node-dialog
+        *brnDialogContent="let ctx"
+        [node]="selectedNode!"
+        (formSubmit)="onEditNodeSubmit($event)"
+        (cancel)="closeEditNodeDialog()"
+      >
+      </app-edit-node-dialog>
+    </hlm-dialog>
+
     <hlm-dialog [state]="selectParentDialogState" (closed)="closeSelectParentDialog()">
       <app-select-parent-dialog
         *brnDialogContent="let ctx"
@@ -433,7 +172,6 @@ import { SelectParentDialogComponent } from '../../ui/dialogs/select-parent-dial
       </app-select-parent-dialog>
     </hlm-dialog>
   `,
-  // ... styles ...
 })
 export class ChartViewComponent {
   readonly store = inject(OrgStore);
@@ -442,6 +180,7 @@ export class ChartViewComponent {
   // Dialog State
   addDialogState: 'open' | 'closed' = 'closed';
   editDialogState: 'open' | 'closed' = 'closed';
+  editNodeDialogState: 'open' | 'closed' = 'closed';
   selectParentDialogState: 'open' | 'closed' = 'closed';
 
   // MANUAL DELETE DIALOG STATE
@@ -453,6 +192,7 @@ export class ChartViewComponent {
   };
 
   selectedPositionItem: PositionItem | null = null;
+  selectedNode: WorkerNode | null = null;
   parentCandidates: WorkerNode[] = [];
   pendingDropPosition: PositionItem | null = null;
 
@@ -461,7 +201,6 @@ export class ChartViewComponent {
   constructor() {
     effect(() => {
       const map = this.store.highlightedIds();
-
       // 1. Cleanup old highlights
       const oldLines = this._elementRef.nativeElement.querySelectorAll(
         '.connector-highlight, .connector-highlight-parent, .connector-highlight-child',
@@ -564,26 +303,17 @@ export class ChartViewComponent {
     this.closeEditPositionDialog();
   }
 
-  onSidebarDrop(event: CdkDragDrop<PositionItem[]>) {
-    if (event.previousContainer === event.container) {
-      this.store.reorderSidebarPositions(event.previousIndex, event.currentIndex);
-    }
-  }
-
-  // --- Drag & Drop Handlers ---
-  onDragStarted() {
-    // No-op for now, but good hook for visual feedback
+  onSidebarReorder(event: { previousIndex: number; currentIndex: number }) {
+    this.store.reorderSidebarPositions(event.previousIndex, event.currentIndex);
   }
 
   // Handle drop on the background (Main Area)
-  // This becomes the Centralized Handler for ALL drops (Background & Nodes)
   onBackgroundDrop(event: CdkDragDrop<PositionItem[]>) {
     // 1. Get the item data (from source)
     const item = event.item.data as PositionItem;
     if (!item) return;
 
     // 2. Hit Test: Check if we actually dropped on a Node
-    // We rely on document.elementFromPoint because CDK DropLists are now simplified
     const { x, y } = event.dropPoint;
     const element = document.elementFromPoint(x, y);
     const nodeElement = element?.closest('[data-node-id]');
@@ -610,8 +340,6 @@ export class ChartViewComponent {
       this.selectParentDialogState = 'open';
     }
   }
-
-  // Removed onDragEnded and handleEmptySpaceDrop as we now use native cdkDropList
 
   // --- Select Parent Dialog ---
   closeSelectParentDialog() {
@@ -706,5 +434,33 @@ export class ChartViewComponent {
 
   toggleDragAndDrop() {
     this.isDraggable = !this.isDraggable;
+  }
+
+  // --- Edit Node Logic ---
+  onEditNode(nodeId: string) {
+    const node = this.store.nodeMap()[nodeId];
+    if (node) {
+      this.selectedNode = node;
+      this.editNodeDialogState = 'open';
+    }
+  }
+
+  closeEditNodeDialog() {
+    this.editNodeDialogState = 'closed';
+    this.selectedNode = null;
+  }
+
+  onEditNodeSubmit(result: PositionFormData) {
+    if (this.selectedNode) {
+      this.store.updateNode(this.selectedNode.id, {
+        name: result.name,
+        nameTh: result.nameTh,
+        nameZh: result.nameZh,
+        nameVi: result.nameVi,
+        section: result.section,
+        salaryType: result.salaryType as any,
+      });
+    }
+    this.closeEditNodeDialog();
   }
 }

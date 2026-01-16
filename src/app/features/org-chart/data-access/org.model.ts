@@ -1,18 +1,7 @@
-export type SalaryType = 'Normal' | 'Admin' | 'Management';
+import { EmployeeNode, SalaryType } from '../../../core/models/employee.model';
 
-export interface WorkerNode {
-  id: string;
-  name: string;
-  nameTh?: string;
-  nameZh?: string;
-  nameVi?: string;
-  section?: string;
-  salaryType?: SalaryType;
-  parentId: string | null;
-  childrenIds: string[];
-  level: number;
-  isExpanded: boolean;
-}
+export type { SalaryType };
+export type WorkerNode = EmployeeNode;
 
 export interface PositionItem {
   id: string;

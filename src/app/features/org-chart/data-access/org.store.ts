@@ -218,6 +218,17 @@ export const OrgStore = signalStore(
       });
     },
 
+    updateNode: (nodeId: string, changes: Partial<WorkerNode>) => {
+      patchState(store, (state) => {
+        const node = state.nodeMap[nodeId];
+        if (!node) return state;
+        const updatedNode = { ...node, ...changes };
+        return {
+          nodeMap: { ...state.nodeMap, [nodeId]: updatedNode },
+        };
+      });
+    },
+
     deleteNode: (nodeId: string, promoteChildren: boolean) => {
       patchState(store, (state) => {
         const node = state.nodeMap[nodeId];
