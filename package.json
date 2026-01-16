@@ -10,7 +10,8 @@
     "serve:ssr:org-chart-app": "node dist/org-chart-app/server/server.mjs",
     "upgrade": "bun update --interactive",
     "format": "prettier --write .",
-    "clean": "bun scripts/clean.ts"
+    "clean": "bun scripts/clean.ts",
+    "deploy": "bun run build && firebase deploy"
   },
   "private": true,
   "dependencies": {
@@ -19,6 +20,7 @@
     "@angular/common": "^21.0.0",
     "@angular/compiler": "^21.0.0",
     "@angular/core": "^21.0.0",
+    "@angular/fire": "*",
     "@angular/forms": "^21.0.0",
     "@angular/platform-browser": "^21.0.0",
     "@angular/platform-server": "^21.0.0",
