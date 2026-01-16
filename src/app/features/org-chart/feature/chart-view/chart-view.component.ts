@@ -15,13 +15,12 @@ import { transformToOrgChartNode } from '../../utils/org-chart-adapter';
 import { HlmDialog } from '@spartan-ng/helm/dialog';
 import { HlmAlertDialogImports } from '@spartan-ng/helm/alert-dialog';
 import { BrnAlertDialogImports } from '@spartan-ng/brain/alert-dialog';
-// eslint-disable-next-line @nx/enforce-module-boundaries
 import {
   NgxInteractiveOrgChart,
   OrgChartNode,
   NgxInteractiveOrgChartTheme,
 } from 'ngx-interactive-org-chart';
-import { PositionFormData, PositionItem, WorkerNode } from '../../data-access/org.model';
+import { PositionFormData, PositionItem, WorkerNode, SalaryType } from '../../data-access/org.model';
 import { SelectParentDialogComponent } from '../../ui/dialogs/select-parent-dialog.component';
 import { ChartToolbarComponent } from '../../ui/chart-toolbar/chart-toolbar.component';
 import { PositionSidebarComponent } from '../../ui/position-sidebar/position-sidebar.component';
@@ -52,16 +51,6 @@ import { EditPositionDialogComponent } from '../../ui/dialogs/edit-position-dial
   ],
   template: `
     <div class="flex h-full w-full bg-background text-foreground" cdkDropListGroup>
-      <app-position-sidebar-skeleton *ngIf="store.isLoading(); else sidebar" />
-      <ng-template #sidebar>
-        <app-position-sidebar
-          [positions]="store.sidebarPositions()"
-          (addPosition)="openAddPositionDialog()"
-          (editPosition)="openEditPositionDialog($event)"
-          (reorder)="onSidebarReorder($event)"
-        ></app-position-sidebar>
-      </ng-template>
-
       <main
         class="figma-bg-dots relative flex-1 overflow-hidden"
         style="--chart-bg: #f5f5f5;"
@@ -82,6 +71,7 @@ import { EditPositionDialogComponent } from '../../ui/dialogs/edit-position-dial
             (toggleMiniMap)="toggleMiniMap()"
             (expandAll)="expandAll()"
             (collapseAll)="collapseAll()"
+            (toggleSidebar)="toggleSidebar()"
           ></app-chart-toolbar>
         </div>
 
@@ -126,6 +116,29 @@ import { EditPositionDialogComponent } from '../../ui/dialogs/edit-position-dial
           </ng-template>
         </ng-template>
       </main>
+
+      <div
+        class="fixed inset-y-0 right-0 z-50 bg-background transition-all duration-300 ease-in-out lg:static lg:z-auto lg:overflow-hidden"
+        [class.translate-x-full]="!isSidebarOpen"
+        [class.translate-x-0]="isSidebarOpen"
+        [class.lg:translate-x-0]="true"
+        [class.lg:w-0]="!isSidebarOpen"
+        [class.lg:w-80]="isSidebarOpen"
+        [class.w-80]="true"
+        [class.shadow-xl]="isSidebarOpen"
+        [class.lg:shadow-none]="true"
+      >
+        <app-position-sidebar-skeleton *ngIf="store.isLoading(); else sidebar" />
+        <ng-template #sidebar>
+          <app-position-sidebar
+            [positions]="store.sidebarPositions()"
+            (addPosition)="openAddPositionDialog()"
+            (editPosition)="openEditPositionDialog($event)"
+            (reorder)="onSidebarReorder($event)"
+            (close)="closeSidebar()"
+          ></app-position-sidebar>
+        </ng-template>
+      </div>
 
       <div
         *ngIf="deleteDialogState.isOpen"
@@ -203,6 +216,7 @@ export class ChartViewComponent {
   editNodeDialogState: 'open' | 'closed' = 'closed';
   selectParentDialogState: 'open' | 'closed' = 'closed';
   moveNodeDialogState: 'open' | 'closed' = 'closed';
+  isSidebarOpen = false;
 
   deleteDialogState = {
     isOpen: false,
@@ -507,9 +521,17 @@ export class ChartViewComponent {
         nameZh: result.nameZh,
         nameVi: result.nameVi,
         section: result.section,
-        salaryType: result.salaryType as any,
+        salaryType: result.salaryType as SalaryType,
       });
     }
     this.closeEditNodeDialog();
+  }
+
+  toggleSidebar() {
+    this.isSidebarOpen = !this.isSidebarOpen;
+  }
+
+  closeSidebar() {
+    this.isSidebarOpen = false;
   }
 }

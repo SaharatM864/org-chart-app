@@ -13,6 +13,7 @@ import {
   lucideMap,
   lucideChevronsDown,
   lucideChevronsUp,
+  lucidePanelRight,
 } from '@ng-icons/lucide';
 
 @Component({
@@ -29,10 +30,30 @@ import {
       lucideMap,
       lucideChevronsDown,
       lucideChevronsUp,
+      lucidePanelRight,
     }),
   ],
   template: `
     <div class="glass-panel flex flex-col gap-1 rounded-lg border border-border/50 p-1 shadow-sm">
+      <hlm-tooltip class="block">
+        <button
+          hlmTooltipTrigger
+          position="left"
+          [showDelay]="300"
+          [hideDelay]="200"
+          [exitAnimationDuration]="300"
+          hlmBtn
+          variant="ghost"
+          size="icon"
+          (click)="toggleSidebar.emit()"
+        >
+          <ng-icon name="lucidePanelRight" size="18"></ng-icon>
+        </button>
+        <span *brnTooltipContent class="side-tooltip"> Toggle Sidebar </span>
+      </hlm-tooltip>
+
+      <div class="my-1 h-px bg-border"></div>
+
       <hlm-tooltip class="block">
         <button
           hlmTooltipTrigger
@@ -217,4 +238,5 @@ export class ChartToolbarComponent {
   @Output() toggleMiniMap = new EventEmitter<void>();
   @Output() expandAll = new EventEmitter<void>();
   @Output() collapseAll = new EventEmitter<void>();
+  @Output() toggleSidebar = new EventEmitter<void>();
 }
