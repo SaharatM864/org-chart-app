@@ -10,7 +10,6 @@ import { WorkerNode } from '../../data-access/org.model';
   selector: 'app-node-card',
   standalone: true,
   imports: [CommonModule, ...HlmCardImports, ...HlmButtonImports, NgIconComponent],
-  providers: [provideIcons({ lucideX, lucideUser })],
   template: `
     <div
       hlmCard
@@ -85,7 +84,10 @@ export class NodeCardComponent {
 
   onDelete(event: Event) {
     event.stopPropagation(); // Prevent drag start if clicking delete
-    this.delete.emit(this.node.id);
+    // setTimeout to break the event loop and prevent stack overflow
+    setTimeout(() => {
+      this.delete.emit(this.node.id);
+    }, 0);
   }
 
   onMouseEnter() {

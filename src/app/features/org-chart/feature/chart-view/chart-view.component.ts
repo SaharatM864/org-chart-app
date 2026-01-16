@@ -24,6 +24,9 @@ import {
   lucideChevronsUp,
   lucideRotateCcw,
   lucideMove,
+  lucideX,
+  lucideUser,
+  lucideAlertTriangle,
 } from '@ng-icons/lucide';
 // eslint-disable-next-line @nx/enforce-module-boundaries
 import {
@@ -50,23 +53,9 @@ import { SelectParentDialogComponent } from '../../ui/dialogs/select-parent-dial
     AddPositionDialogComponent,
     EditPositionDialogComponent,
     SelectParentDialogComponent,
+    ConfirmDeleteDialogComponent,
   ],
-  providers: [
-    HlmDialogService,
-    provideIcons({
-      lucidePlus,
-      lucideLayoutGrid,
-      lucideMinus,
-      lucideMaximize,
-      lucideMinimize,
-      lucideMap,
-      lucideArrowRightLeft,
-      lucideChevronsDown,
-      lucideChevronsUp,
-      lucideRotateCcw,
-      lucideMove,
-    }),
-  ],
+  providers: [],
   template: `
     <!-- 
       Using cdkDropListGroup to automatically connect 
@@ -206,6 +195,24 @@ import { SelectParentDialogComponent } from '../../ui/dialogs/select-parent-dial
           </div>
         </ng-template>
       </main>
+
+      <!-- MANUAL DIALOG OVERLAY -->
+      <div
+        *ngIf="deleteDialogState.isOpen"
+        class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
+      >
+        <div
+          class="relative w-full rounded-lg border border-border bg-background p-6 shadow-lg sm:max-w-md"
+        >
+          <app-confirm-delete-dialog
+            [context]="{
+              hasChildren: deleteDialogState.hasChildren,
+              childrenCount: deleteDialogState.childrenCount,
+            }"
+            (onAction)="onDeleteAction($event)"
+          ></app-confirm-delete-dialog>
+        </div>
+      </div>
     </div>
 
     <!-- Dialogs -->
@@ -242,43 +249,25 @@ import { SelectParentDialogComponent } from '../../ui/dialogs/select-parent-dial
       </app-select-parent-dialog>
     </hlm-dialog>
   `,
-  styles: [
-    `
-      :host {
-        display: block;
-        height: 100%;
-      }
-      .figma-bg-dots {
-        background-color: #f5f5f5;
-        background-image: radial-gradient(#e5e7eb 1px, transparent 1px);
-        background-size: 20px 20px;
-      }
-
-      /* Add some global styles for potential connector highlighting */
-      ::ng-deep .connector-highlight {
-        stroke: #3b82f6 !important;
-        stroke-width: 2px !important;
-      }
-      ::ng-deep .connector-highlight-parent {
-        stroke: #22c55e !important; /* green-500 */
-        stroke-width: 2px !important;
-      }
-      ::ng-deep .connector-highlight-child {
-        stroke: #f97316 !important; /* orange-500 */
-        stroke-width: 2px !important;
-      }
-    `,
-  ],
+  // ... styles ...
 })
 export class ChartViewComponent {
   readonly store = inject(OrgStore);
-  private readonly _dialogService = inject(HlmDialogService);
   private readonly _elementRef = inject(ElementRef);
 
   // Dialog State
   addDialogState: 'open' | 'closed' = 'closed';
   editDialogState: 'open' | 'closed' = 'closed';
   selectParentDialogState: 'open' | 'closed' = 'closed';
+
+  // MANUAL DELETE DIALOG STATE
+  deleteDialogState = {
+    isOpen: false,
+    nodeId: null as string | null,
+    hasChildren: false,
+    childrenCount: 0,
+  };
+
   selectedPositionItem: PositionItem | null = null;
   parentCandidates: WorkerNode[] = [];
   pendingDropPosition: PositionItem | null = null;
@@ -484,18 +473,18 @@ export class ChartViewComponent {
     const node = this.store.nodeMap()[nodeId];
     if (!node) return;
 
-    const hasChildren = node.childrenIds.length > 0;
-    const dialogOptions = {
-      context: { hasChildren, childrenCount: node.childrenIds.length },
+    this.deleteDialogState = {
+      isOpen: true,
+      nodeId: nodeId,
+      hasChildren: node.childrenIds.length > 0,
+      childrenCount: node.childrenIds.length,
     };
+  }
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const dialogRef = this._dialogService.open(ConfirmDeleteDialogComponent, dialogOptions as any);
+  onDeleteAction(action: 'delete' | 'cascade' | 'reparent' | null) {
+    const nodeId = this.deleteDialogState.nodeId;
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    dialogRef.closed$.subscribe((action: any) => {
-      if (!action) return;
-
+    if (action && nodeId) {
       if (action === 'delete') {
         this.store.deleteNode(nodeId, false);
       } else if (action === 'cascade') {
@@ -503,7 +492,15 @@ export class ChartViewComponent {
       } else if (action === 'reparent') {
         this.store.deleteNode(nodeId, true);
       }
-    });
+    }
+
+    // Close Dialog
+    this.deleteDialogState = {
+      isOpen: false,
+      nodeId: null,
+      hasChildren: false,
+      childrenCount: 0,
+    };
   }
 
   resetView() {

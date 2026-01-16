@@ -1,27 +1,25 @@
-import { Component, inject } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { BrnDialogRef, injectBrnDialogContext } from '@spartan-ng/brain/dialog';
-import { HlmDialogImports } from '@spartan-ng/helm/dialog';
 import { HlmButton } from '@spartan-ng/helm/button';
-import { NgIconComponent, provideIcons } from '@ng-icons/core';
-import { lucideAlertTriangle } from '@ng-icons/lucide';
+import { NgIconComponent } from '@ng-icons/core';
 
 @Component({
   selector: 'app-confirm-delete-dialog',
   standalone: true,
-  imports: [CommonModule, ...HlmDialogImports, HlmButton, NgIconComponent],
-  providers: [provideIcons({ lucideAlertTriangle })],
+  imports: [CommonModule, HlmButton, NgIconComponent],
   template: `
-    <hlm-dialog-content class="sm:max-w-106.25">
-      <hlm-dialog-header>
-        <h3 hlmDialogTitle class="flex items-center gap-2 text-destructive">
+    <div
+      class="relative z-50 mx-auto grid w-full max-w-[calc(100%-2rem)] gap-4 rounded-lg border bg-background p-6 shadow-lg sm:mx-0 sm:max-w-lg"
+    >
+      <div class="flex flex-col gap-2 text-center sm:text-start">
+        <h3 class="flex items-center gap-2 text-lg font-semibold text-destructive">
           <ng-icon name="lucideAlertTriangle" class="text-destructive"></ng-icon>
           Confirm Deletion
         </h3>
-        <p hlmDialogDescription>
+        <p class="text-sm text-muted-foreground">
           Are you sure you want to delete this position? This action cannot be undone.
         </p>
-      </hlm-dialog-header>
+      </div>
 
       <div class="py-4">
         <div *ngIf="context.hasChildren" class="flex flex-col gap-4">
@@ -34,10 +32,10 @@ import { lucideAlertTriangle } from '@ng-icons/lucide';
           <p class="text-sm">How would you like to handle the child nodes?</p>
 
           <div class="flex gap-2">
-            <button hlmBtn variant="outline" class="flex-1" (click)="selectAction('cascade')">
+            <button hlmBtn variant="outline" class="flex-1" (click)="onAction.emit('cascade')">
               Delete All Children
             </button>
-            <button hlmBtn variant="outline" class="flex-1" (click)="selectAction('reparent')">
+            <button hlmBtn variant="outline" class="flex-1" (click)="onAction.emit('reparent')">
               Move to Grandparent
             </button>
           </div>
@@ -48,32 +46,24 @@ import { lucideAlertTriangle } from '@ng-icons/lucide';
         </div>
       </div>
 
-      <hlm-dialog-footer class="gap-2">
-        <button hlmBtn variant="ghost" (click)="close()">Cancel</button>
+      <div class="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end sm:space-x-2">
+        <button hlmBtn variant="ghost" (click)="onAction.emit(null)">Cancel</button>
         <button
           *ngIf="!context.hasChildren"
           hlmBtn
           variant="destructive"
-          (click)="selectAction('delete')"
+          (click)="onAction.emit('delete')"
         >
           Delete
         </button>
-      </hlm-dialog-footer>
-    </hlm-dialog-content>
+      </div>
+    </div>
   `,
 })
 export class ConfirmDeleteDialogComponent {
-  private readonly _dialogRef = inject(BrnDialogRef);
-  public readonly context = injectBrnDialogContext<{
-    hasChildren: boolean;
-    childrenCount: number;
-  }>();
-
-  selectAction(action: 'delete' | 'cascade' | 'reparent') {
-    this._dialogRef.close(action);
-  }
-
-  close() {
-    this._dialogRef.close(null);
-  }
+  @Input() context: { hasChildren: boolean; childrenCount: number } = {
+    hasChildren: false,
+    childrenCount: 0,
+  };
+  @Output() onAction = new EventEmitter<'delete' | 'cascade' | 'reparent' | null>();
 }

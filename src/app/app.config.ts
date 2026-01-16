@@ -11,6 +11,23 @@ import { provideHttpClient, withFetch } from '@angular/common/http';
 import { TranslateModule } from '@ngx-translate/core';
 // eslint-disable-next-line @nx/enforce-module-boundaries
 import { provideTranslateHttpLoader } from '@ngx-translate/http-loader';
+import { provideIcons } from '@ng-icons/core';
+import {
+  lucidePlus,
+  lucideLayoutGrid,
+  lucideMinus,
+  lucideMaximize,
+  lucideMinimize,
+  lucideMap,
+  lucideArrowRightLeft,
+  lucideChevronsDown,
+  lucideChevronsUp,
+  lucideRotateCcw,
+  lucideMove,
+  lucideX,
+  lucideUser,
+  lucideAlertTriangle,
+} from '@ng-icons/lucide';
 
 import { routes } from './app.routes';
 
@@ -26,5 +43,21 @@ export const appConfig: ApplicationConfig = {
       suffix: '.json',
     }),
     importProvidersFrom(TranslateModule.forRoot()),
+    provideIcons({
+      lucidePlus,
+      lucideLayoutGrid,
+      lucideMinus,
+      lucideMaximize,
+      lucideMinimize,
+      lucideMap,
+      lucideArrowRightLeft,
+      lucideChevronsDown,
+      lucideChevronsUp,
+      lucideRotateCcw,
+      lucideMove,
+      lucideX,
+      lucideUser,
+      lucideAlertTriangle,
+    }),
   ],
 };
