@@ -1,6 +1,5 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { HlmCardImports } from '@spartan-ng/helm/card';
 import { HlmButtonImports } from '@spartan-ng/helm/button';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
 import { lucideTrash2, lucideUser } from '@ng-icons/lucide';
@@ -18,7 +17,7 @@ import { WorkerNode } from '../../data-access/org.model';
       Using bg-white/95 explicitly ensures stable background color.
     -->
     <div
-      class="text-card-foreground group relative flex w-56 flex-col overflow-hidden rounded-xl border border-l-[6px] border-border bg-white/95 p-4 shadow-sm backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl dark:bg-zinc-900/95"
+      class="text-card-foreground group relative flex w-56 flex-col overflow-hidden rounded-xl border border-l-[6px] border-border bg-white/95 p-4 shadow-sm backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl dark:border-border/50 dark:bg-zinc-900/95 dark:shadow-none dark:hover:border-primary/50"
       [class.border-l-primary]="!node.parentId"
       [class.border-l-secondary]="node.parentId"
       [class.ring-2]="!!highlightType"
@@ -26,11 +25,14 @@ import { WorkerNode } from '../../data-access/org.model';
       [class.ring-green-500]="highlightType === 'parent'"
       [class.ring-orange-500]="highlightType === 'child'"
       [class.bg-blue-50]="highlightType === 'current'"
+      [class.dark:bg-blue-900/20]="highlightType === 'current'"
       [class.bg-green-50]="highlightType === 'parent'"
+      [class.dark:bg-green-900/20]="highlightType === 'parent'"
       [class.bg-orange-50]="highlightType === 'child'"
+      [class.dark:bg-orange-900/20]="highlightType === 'child'"
       [attr.data-level]="node.level"
       [attr.data-node-id]="node.id"
-      (click)="onEdit($event)"
+      (click)="onEdit()"
     >
       <button
         hlmBtn
@@ -46,10 +48,13 @@ import { WorkerNode } from '../../data-access/org.model';
 
       <div class="flex items-start gap-4">
         <div
-          class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-linear-to-br from-gray-100 to-gray-200 text-gray-600 shadow-inner dark:from-zinc-800 dark:to-zinc-700 dark:text-gray-300"
+          class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-linear-to-br from-gray-100 to-gray-200 text-gray-600 shadow-inner dark:border dark:border-zinc-700 dark:from-zinc-800 dark:to-zinc-700 dark:text-zinc-300 dark:shadow-none"
           [class.from-primary-100]="highlightType === 'current'"
+          [class.dark:from-primary-900/50]="highlightType === 'current'"
           [class.to-primary-200]="highlightType === 'current'"
+          [class.dark:to-primary-800/50]="highlightType === 'current'"
           [class.text-primary-700]="highlightType === 'current'"
+          [class.dark:text-primary-300]="highlightType === 'current'"
         >
           <ng-icon name="lucideUser" size="20"></ng-icon>
         </div>
@@ -95,7 +100,7 @@ export class NodeCardComponent {
     }, 0);
   }
 
-  onEdit(event: Event) {
+  onEdit() {
     this.edit.emit(this.node.id);
   }
 

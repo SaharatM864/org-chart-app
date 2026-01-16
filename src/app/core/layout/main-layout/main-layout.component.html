@@ -19,6 +19,13 @@
       </nav>
 
       <div class="ml-auto flex items-center gap-2">
+        <button hlmBtn variant="ghost" size="icon" (click)="toggleTheme()">
+          @if ((theme$ | async) === 'dark') {
+            <ng-icon hlm name="lucideMoon" class="h-5 w-5" />
+          } @else {
+            <ng-icon hlm name="lucideSun" class="h-5 w-5" />
+          }
+        </button>
         <button hlmBtn variant="ghost" size="icon" class="rounded-full">
           <div
             class="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 font-bold text-primary"
