@@ -42,7 +42,6 @@ import { EditPositionDialogComponent } from '../../ui/dialogs/edit-position-dial
   ],
   template: `
     <div class="flex h-full w-full bg-background text-foreground" cdkDropListGroup>
-      <!-- Refactored Sidebar -->
       <app-position-sidebar
         [positions]="store.sidebarPositions()"
         (addPosition)="openAddPositionDialog()"
@@ -50,7 +49,6 @@ import { EditPositionDialogComponent } from '../../ui/dialogs/edit-position-dial
         (reorder)="onSidebarReorder($event)"
       ></app-position-sidebar>
 
-      <!-- Main Chart Area -->
       <main
         class="figma-bg-dots relative flex-1 overflow-hidden"
         style="--chart-bg: #f5f5f5;"
@@ -59,7 +57,6 @@ import { EditPositionDialogComponent } from '../../ui/dialogs/edit-position-dial
         (cdkDropListDropped)="onBackgroundDrop($event)"
       >
         <div class="absolute top-4 right-4 z-10 flex flex-col gap-2">
-          <!-- Refactored Toolbar -->
           <app-chart-toolbar
             [isDraggable]="isDraggable"
             [showMiniMap]="showMiniMap"
@@ -113,7 +110,6 @@ import { EditPositionDialogComponent } from '../../ui/dialogs/edit-position-dial
         </ng-template>
       </main>
 
-      <!-- MANUAL DIALOG OVERLAY -->
       <div
         *ngIf="deleteDialogState.isOpen"
         class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
@@ -131,8 +127,6 @@ import { EditPositionDialogComponent } from '../../ui/dialogs/edit-position-dial
         </div>
       </div>
     </div>
-
-    <!-- Dialogs -->
 
     <hlm-dialog [state]="addDialogState" (closed)="closeAddPositionDialog()">
       <app-add-position-dialog
@@ -178,13 +172,11 @@ export class ChartViewComponent {
   readonly store = inject(OrgStore);
   private readonly _elementRef = inject(ElementRef);
 
-  // Dialog State
   addDialogState: 'open' | 'closed' = 'closed';
   editDialogState: 'open' | 'closed' = 'closed';
   editNodeDialogState: 'open' | 'closed' = 'closed';
   selectParentDialogState: 'open' | 'closed' = 'closed';
 
-  // MANUAL DELETE DIALOG STATE
   deleteDialogState = {
     isOpen: false,
     nodeId: null as string | null,
@@ -202,7 +194,7 @@ export class ChartViewComponent {
   constructor() {
     effect(() => {
       const map = this.store.highlightedIds();
-      // 1. Cleanup old highlights
+      // Cleanup old highlights
       const oldLines = this._elementRef.nativeElement.querySelectorAll(
         '.connector-highlight, .connector-highlight-parent, .connector-highlight-child',
       );
@@ -218,7 +210,6 @@ export class ChartViewComponent {
     });
   }
 
-  // Transform store data to OrgChartNode structure
   chartData = computed(() => {
     const nodes = transformToOrgChartNode(this.store.nodeMap(), this.store.rootIds());
     return nodes.length > 0 ? nodes[0] : null;
@@ -233,12 +224,11 @@ export class ChartViewComponent {
       padding: '0',
     },
     connector: {
-      color: '#e2e8f0', // border-border
-      activeColor: '#3b82f6', // primary
+      color: '#e2e8f0',
+      activeColor: '#3b82f6',
     },
   };
 
-  // View State
   layoutDirection: 'vertical' | 'horizontal' = 'vertical';
   showMiniMap = false;
   isDraggable = true;
@@ -260,7 +250,6 @@ export class ChartViewComponent {
     }
   }
 
-  // --- Add Position Logic ---
   openAddPositionDialog() {
     this.addDialogState = 'open';
   }
@@ -280,7 +269,6 @@ export class ChartViewComponent {
     this.closeAddPositionDialog();
   }
 
-  // --- Edit Position Logic ---
   openEditPositionDialog(item: PositionItem) {
     this.selectedPositionItem = item;
     this.editDialogState = 'open';
@@ -308,13 +296,10 @@ export class ChartViewComponent {
     this.store.reorderSidebarPositions(event.previousIndex, event.currentIndex);
   }
 
-  // Handle drop on the background (Main Area)
   onBackgroundDrop(event: CdkDragDrop<PositionItem[]>) {
-    // 1. Get the item data (from source)
     const item = event.item.data as PositionItem;
     if (!item) return;
 
-    // 2. Hit Test: Check if we actually dropped on a Node
     const { x, y } = event.dropPoint;
     const element = document.elementFromPoint(x, y);
     const nodeElement = element?.closest('[data-node-id]');
@@ -324,25 +309,21 @@ export class ChartViewComponent {
       if (nodeId) {
         console.log('Hit Test Detection: Dropped on Node', nodeId);
         this.store.addNode(nodeId, item);
-        return; // Exit early, do not show dialog
+        return;
       }
     }
 
-    // 3. If NOT on a node (Empty Space), proceed with "Select Parent" Logic
     const allNodes = Object.values(this.store.nodeMap());
 
     if (allNodes.length === 0) {
-      // If no nodes exist, just add as root (or handle as first node)
       this.store.addNode(null, item);
     } else {
-      // Open dialog to let user select parent
       this.parentCandidates = allNodes;
       this.pendingDropPosition = item;
       this.selectParentDialogState = 'open';
     }
   }
 
-  // --- Select Parent Dialog ---
   closeSelectParentDialog() {
     this.selectParentDialogState = 'closed';
     this.parentCandidates = [];
@@ -381,7 +362,6 @@ export class ChartViewComponent {
       }
     }
 
-    // Close Dialog
     this.deleteDialogState = {
       isOpen: false,
       nodeId: null,
@@ -437,7 +417,6 @@ export class ChartViewComponent {
     this.isDraggable = !this.isDraggable;
   }
 
-  // --- Edit Node Logic ---
   onEditNode(nodeId: string) {
     const node = this.store.nodeMap()[nodeId];
     if (node) {

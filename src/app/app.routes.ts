@@ -11,7 +11,7 @@ export const routes: Routes = [
         redirectTo: 'org-chart',
         pathMatch: 'full',
       },
-      // Dashboard route removed
+
       {
         path: 'org-chart',
         loadChildren: () =>
@@ -20,7 +20,7 @@ export const routes: Routes = [
       {
         path: 'settings',
         loadComponent: () =>
-          import('./features/dashboard/dashboard.component').then((m) => m.DashboardComponent), // Placeholder reuse
+          import('./features/dashboard/dashboard.component').then((m) => m.DashboardComponent),
       },
     ],
   },

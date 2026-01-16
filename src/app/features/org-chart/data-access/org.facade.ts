@@ -1,4 +1,3 @@
-// Facade Pattern to expose state and logic to components
 import { inject, Injectable } from '@angular/core';
 import { OrgStore } from './org.store';
 import { MoveNodePayload, PositionItem } from './org.model';

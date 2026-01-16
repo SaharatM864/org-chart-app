@@ -114,32 +114,8 @@ export class EditPositionDialogComponent {
     nameZh: [''],
     nameVi: [''],
     section: ['General', Validators.required],
-    salaryType: ['Normal', Validators.required], // Note: Salary type isn't in PositionItem, maybe we should add it? Assuming default for now or we need to update PositionItem.
+    salaryType: ['Normal', Validators.required],
   });
-
-  // Note: PositionItem doesn't seem to have salaryType based on previous file view.
-  // The original create-dialog assumed it did or just defaulted.
-  // Checking org.model.ts again... PositionItem does NOT have salaryType.
-  // But WorkerNode DOES.
-  // In create-position-dialog lines 126 and 147, it uses 'Normal'.
-  // But in Form it has it.
-  // Wait, in create-position-dialog line 123: section: value.code.
-  // It doesn't seem to patch salaryType from value?
-  // Let's look at create-position-dialog line 118...
-  /*
-      this.form.patchValue({
-        name: value.name,
-        nameTh: value.nameTh,
-        nameZh: value.nameZh,
-        nameVi: value.nameVi,
-        section: value.code,
-      });
-  */
-  // It DOES NOT patch salaryType from the item. It implies salaryType is not stored in PositionItem (sidebar items).
-  // So for Edit, salaryType will stay default 'Normal' unless we modify PositionItem.
-  // For now I will keep it as is (default Normal/Management/Admin in form) but start with what's in the form (default Normal).
-  // If the user wants to save salaryType on the PositionItem, that's a model change.
-  // I'll stick to the original behavior: Edit dialog loads name/code but resets salaryType (or keeps default).
 
   onSubmit() {
     if (this.form.valid) {

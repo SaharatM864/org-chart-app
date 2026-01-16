@@ -13,7 +13,6 @@ export interface Employee {
   avatarUrl?: string;
 }
 
-// Extending Employee for the Org Chart specifics (graph structure)
 export interface EmployeeNode extends Employee {
   parentId: string | null;
   childrenIds: string[];

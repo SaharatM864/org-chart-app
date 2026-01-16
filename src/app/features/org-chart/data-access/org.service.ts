@@ -1,4 +1,3 @@
-// API Service handling HTTP requests
 import { Injectable } from '@angular/core';
 import { Observable, of, delay } from 'rxjs';
 import { OrgState } from './org.model';

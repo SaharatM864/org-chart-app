@@ -199,7 +199,7 @@ import {
         transform: translateY(-50%) rotate(-90deg);
         border-width: 5px;
         border-style: solid;
-        border-color: transparent transparent transparent transparent; /* Arrow simplified via SVG in original, but removed here for cleanliness. Alternatively can use default tooltip arrow */
+        border-color: transparent transparent transparent transparent;
       }
     `,
   ],

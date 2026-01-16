@@ -19,7 +19,6 @@ import { NodeCardComponent } from '../node-card/node-card.component';
         </span>
       </div>
 
-      <!-- Drop Zone -->
       <div
         cdkDropList
         [id]="'level-' + level"
@@ -40,7 +39,6 @@ import { NodeCardComponent } from '../node-card/node-card.component';
           (unhighlight)="unhighlightNode.emit()"
         ></app-node-card>
 
-        <!-- Empty State Placeholder if needed -->
         <div
           *ngIf="nodes.length === 0"
           class="flex w-full items-center justify-center py-8 text-sm text-muted-foreground/50 italic"

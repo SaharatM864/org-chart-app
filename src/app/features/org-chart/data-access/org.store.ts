@@ -61,20 +61,16 @@ export const OrgStore = signalStore(
       const map = store.nodeMap();
       const resultMap = new Map<string, 'current' | 'parent' | 'child'>();
 
-      // 1. Valid Check
       if (!map[id]) return resultMap;
 
-      // 2. Add Current
       resultMap.set(id, 'current');
 
-      // 3. Traverse Up (Parents)
       let curr = map[id];
       while (curr && curr.parentId) {
         resultMap.set(curr.parentId, 'parent');
         curr = map[curr.parentId];
       }
 
-      // 4. Traverse Down (Children) - Recursive
       const addChildren = (nodeId: string) => {
         const node = map[nodeId];
         if (node) {
@@ -98,7 +94,7 @@ export const OrgStore = signalStore(
       orgService.getOrgChart().subscribe({
         next: (data) => {
           patchState(store, {
-            nodeMap: data.nodeMap || {}, // Safety check
+            nodeMap: data.nodeMap || {},
             rootIds: data.rootIds || [],
             isLoading: false,
           });
@@ -151,7 +147,6 @@ export const OrgStore = signalStore(
       const node = state[nodeId];
       if (!node) return;
 
-      // 1. Circular Dependency Check: Cannot move node into its own descendant
       let currentCheckId: string | null = newParentId;
       while (currentCheckId) {
         if (currentCheckId === nodeId) {
@@ -166,7 +161,6 @@ export const OrgStore = signalStore(
         let updatedRootIds = [...currentState.rootIds];
         const oldParentId = node.parentId;
 
-        // 2. Remove from old location
         if (oldParentId) {
           const oldParent = updatedNodeMap[oldParentId];
           if (oldParent) {
@@ -179,7 +173,6 @@ export const OrgStore = signalStore(
           updatedRootIds = updatedRootIds.filter((id) => id !== nodeId);
         }
 
-        // 3. Update Node Data (Parent & Level)
         const newLevel = newParentId ? updatedNodeMap[newParentId].level + 1 : 1;
 
         // Recursive function to update levels of children if depth changes
@@ -201,7 +194,6 @@ export const OrgStore = signalStore(
           node.childrenIds.forEach((cid) => updateChildrenLevels(cid, newLevel + 1));
         }
 
-        // 4. Insert into new location
         if (newParentId) {
           const newParent = updatedNodeMap[newParentId];
           const newChildren = [...newParent.childrenIds];
@@ -238,10 +230,8 @@ export const OrgStore = signalStore(
         const updatedNodeMap: Record<string, WorkerNode> = { ...state.nodeMap };
         let updatedRootIds: string[] = [...state.rootIds];
 
-        // Remove node from map
         delete updatedNodeMap[nodeId];
 
-        // Remove reference from parent
         if (parentId) {
           const parent = updatedNodeMap[parentId];
           updatedNodeMap[parentId] = {
@@ -253,7 +243,6 @@ export const OrgStore = signalStore(
         }
 
         if (!promoteChildren) {
-          // Delete children recursively
           const deleteChildren = (id: string) => {
             const child = state.nodeMap[id];
             if (child) {

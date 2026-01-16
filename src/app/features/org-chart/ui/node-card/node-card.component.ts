@@ -28,7 +28,6 @@ import { WorkerNode } from '../../data-access/org.model';
       [attr.data-node-id]="node.id"
       (click)="onEdit($event)"
     >
-      <!-- Delete Button (Visible on Hover) -->
       <button
         hlmBtn
         variant="ghost"
@@ -41,7 +40,6 @@ import { WorkerNode } from '../../data-access/org.model';
         <ng-icon name="lucideTrash2" size="16"></ng-icon>
       </button>
 
-      <!-- Content -->
       <div class="flex items-start gap-4">
         <div
           class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-linear-to-br from-gray-100 to-gray-200 text-gray-600 shadow-inner dark:from-zinc-800 dark:to-zinc-700 dark:text-gray-300"
@@ -64,7 +62,6 @@ import { WorkerNode } from '../../data-access/org.model';
         </div>
       </div>
 
-      <!-- Footer / ID / Level -->
       <div
         class="mt-3 flex items-center justify-between border-t border-border/40 pt-2 text-[10px] font-medium text-muted-foreground/80"
       >
@@ -87,8 +84,8 @@ export class NodeCardComponent {
   @Output() unhighlight = new EventEmitter<void>();
 
   onDelete(event: Event) {
-    event.stopPropagation(); // Prevent drag start if clicking delete
-    // setTimeout to break the event loop and prevent stack overflow
+    event.stopPropagation();
+
     setTimeout(() => {
       this.delete.emit(this.node.id);
     }, 0);
