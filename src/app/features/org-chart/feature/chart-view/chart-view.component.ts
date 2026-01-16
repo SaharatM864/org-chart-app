@@ -114,9 +114,7 @@ import { EditPositionDialogComponent } from '../../ui/dialogs/edit-position-dial
         *ngIf="deleteDialogState.isOpen"
         class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
       >
-        <div
-          class="relative w-full rounded-lg border border-border bg-background p-6 shadow-lg sm:max-w-md"
-        >
+        <div class="relative w-full sm:max-w-md">
           <app-confirm-delete-dialog
             [context]="{
               hasChildren: deleteDialogState.hasChildren,
