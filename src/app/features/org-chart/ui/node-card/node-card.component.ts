@@ -9,12 +9,16 @@ import { WorkerNode } from '../../data-access/org.model';
 @Component({
   selector: 'app-node-card',
   standalone: true,
-  imports: [CommonModule, ...HlmCardImports, ...HlmButtonImports, NgIconComponent],
+  imports: [CommonModule, ...HlmButtonImports, NgIconComponent],
   providers: [provideIcons({ lucideTrash2, lucideUser })],
   template: `
+    <!-- 
+      NOTE: manually applying card styles instead of using hlmCard directive 
+      to prevent background color override issues during state changes (hover/highlight).
+      Using bg-white/95 explicitly ensures stable background color.
+    -->
     <div
-      hlmCard
-      class="group relative flex w-56 flex-col overflow-hidden rounded-xl border-l-[6px] bg-white/95 p-4 shadow-sm backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl dark:bg-zinc-900/95"
+      class="text-card-foreground group relative flex w-56 flex-col overflow-hidden rounded-xl border border-l-[6px] border-border bg-white/95 p-4 shadow-sm backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl dark:bg-zinc-900/95"
       [class.border-l-primary]="!node.parentId"
       [class.border-l-secondary]="node.parentId"
       [class.ring-2]="!!highlightType"
