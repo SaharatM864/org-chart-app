@@ -6,12 +6,15 @@ import { BrnDialogContent } from '@spartan-ng/brain/dialog';
 import { OrgStore } from '../../data-access/org.store';
 import { AddPositionDialogComponent } from '../../ui/dialogs/add-position-dialog.component';
 import { ConfirmDeleteDialogComponent } from '../../ui/dialogs/confirm-delete-dialog.component';
+import { ConfirmMoveNodeDialogComponent } from '../../ui/dialogs/confirm-move-node-dialog.component';
 import { NodeCardComponent } from '../../ui/node-card/node-card.component';
 import { ChartViewSkeletonComponent } from '../../ui/chart-view-skeleton/chart-view-skeleton.component';
 import { PositionSidebarSkeletonComponent } from '../../ui/position-sidebar-skeleton/position-sidebar-skeleton.component';
 import { EditNodeDialogComponent } from '../../ui/dialogs/edit-node-dialog.component';
 import { transformToOrgChartNode } from '../../utils/org-chart-adapter';
 import { HlmDialog } from '@spartan-ng/helm/dialog';
+import { HlmAlertDialogImports } from '@spartan-ng/helm/alert-dialog';
+import { BrnAlertDialogImports } from '@spartan-ng/brain/alert-dialog';
 // eslint-disable-next-line @nx/enforce-module-boundaries
 import {
   NgxInteractiveOrgChart,
@@ -34,11 +37,14 @@ import { EditPositionDialogComponent } from '../../ui/dialogs/edit-position-dial
     NgxInteractiveOrgChart,
     BrnDialogContent,
     HlmDialog,
+    HlmAlertDialogImports,
+    BrnAlertDialogImports,
     AddPositionDialogComponent,
     EditPositionDialogComponent,
     EditNodeDialogComponent,
     SelectParentDialogComponent,
     ConfirmDeleteDialogComponent,
+    ConfirmMoveNodeDialogComponent,
     ChartToolbarComponent,
     PositionSidebarComponent,
     ChartViewSkeletonComponent,
@@ -175,6 +181,17 @@ import { EditPositionDialogComponent } from '../../ui/dialogs/edit-position-dial
       >
       </app-select-parent-dialog>
     </hlm-dialog>
+
+    <hlm-alert-dialog [state]="moveNodeDialogState" (closed)="onCancelMoveNode()">
+      <app-confirm-move-node-dialog
+        *brnAlertDialogContent="let ctx"
+        [draggedNodeName]="draggedNodeName"
+        [targetNodeName]="targetNodeName"
+        (onConfirm)="onConfirmMoveNode($event)"
+        (onCancel)="onCancelMoveNode()"
+      >
+      </app-confirm-move-node-dialog>
+    </hlm-alert-dialog>
   `,
 })
 export class ChartViewComponent {
@@ -185,6 +202,7 @@ export class ChartViewComponent {
   editDialogState: 'open' | 'closed' = 'closed';
   editNodeDialogState: 'open' | 'closed' = 'closed';
   selectParentDialogState: 'open' | 'closed' = 'closed';
+  moveNodeDialogState: 'open' | 'closed' = 'closed';
 
   deleteDialogState = {
     isOpen: false,
@@ -197,6 +215,10 @@ export class ChartViewComponent {
   selectedNode: WorkerNode | null = null;
   parentCandidates: WorkerNode[] = [];
   pendingDropPosition: PositionItem | null = null;
+
+  pendingMovePayload: { nodeId: string; newParentId: string } | null = null;
+  draggedNodeName = '';
+  targetNodeName = '';
 
   @ViewChild('orgChart') orgChart?: NgxInteractiveOrgChart<OrgChartNode>;
 
@@ -251,12 +273,50 @@ export class ChartViewComponent {
 
   onNodeDrop(event: { draggedNode: OrgChartNode; targetNode: OrgChartNode }) {
     if (event.draggedNode?.id && event.targetNode?.id) {
-      this.store.moveNode({
+      this.pendingMovePayload = {
         nodeId: event.draggedNode.id,
         newParentId: event.targetNode.id,
+      };
+
+      const skipConfirm = sessionStorage.getItem('skipMoveConfirmation') === 'true';
+
+      if (skipConfirm) {
+        this.onConfirmMoveNode(false);
+      } else {
+        const draggedData = event.draggedNode.data as WorkerNode;
+        const targetData = event.targetNode.data as WorkerNode;
+
+        this.draggedNodeName = draggedData?.name || 'Unknown';
+        this.targetNodeName = targetData?.name || 'Unknown';
+        this.moveNodeDialogState = 'open';
+      }
+    }
+  }
+
+  onConfirmMoveNode(dontAskAgain: boolean) {
+    if (dontAskAgain) {
+      sessionStorage.setItem('skipMoveConfirmation', 'true');
+    }
+
+    if (this.pendingMovePayload) {
+      this.store.moveNode({
+        nodeId: this.pendingMovePayload.nodeId,
+        newParentId: this.pendingMovePayload.newParentId,
         newIndex: 0,
       });
     }
+    this.closeMoveNodeDialog();
+  }
+
+  onCancelMoveNode() {
+    this.closeMoveNodeDialog();
+  }
+
+  closeMoveNodeDialog() {
+    this.moveNodeDialogState = 'closed';
+    this.pendingMovePayload = null;
+    this.draggedNodeName = '';
+    this.targetNodeName = '';
   }
 
   openAddPositionDialog() {
