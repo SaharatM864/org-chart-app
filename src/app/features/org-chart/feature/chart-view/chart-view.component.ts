@@ -1,5 +1,5 @@
 import { Component, computed, inject, ViewChild, effect, ElementRef } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
+
 import { CommonModule } from '@angular/common';
 import { CdkDragDrop, CdkDragRelease, DragDropModule } from '@angular/cdk/drag-drop';
 
@@ -32,7 +32,7 @@ import { SelectParentDialogComponent } from '../../ui/dialogs/select-parent-dial
 import { ChartToolbarComponent } from '../../ui/chart-toolbar/chart-toolbar.component';
 import { PositionSidebarComponent } from '../../ui/position-sidebar/position-sidebar.component';
 import { EditPositionDialogComponent } from '../../ui/dialogs/edit-position-dialog.component';
-import { ThemeService } from '../../../../core/theme/theme.service';
+import { ThemeStore } from '../../../../core/theme/theme.service';
 import { ChartDragDropService } from './chart-drag-drop.service';
 
 @Component({
@@ -234,8 +234,8 @@ export class ChartViewComponent {
   readonly store = inject(OrgStore);
   private readonly _dragDropService = inject(ChartDragDropService);
   private readonly _elementRef = inject(ElementRef);
-  private readonly _themeService = inject(ThemeService);
-  private readonly _theme = toSignal(this._themeService.theme$);
+  private readonly _themeStore = inject(ThemeStore);
+  private readonly _theme = this._themeStore.theme;
 
   addDialogState: 'open' | 'closed' = 'closed';
   editDialogState: 'open' | 'closed' = 'closed';

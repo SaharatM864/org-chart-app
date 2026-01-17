@@ -1,6 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { LanguageService } from '../../../core/i18n/language.service';
+import { LanguageStore } from '../../../core/i18n/language.service';
 import { HlmButton } from '@spartan-ng/helm/button';
 import { HlmDropdownMenuImports } from '@spartan-ng/helm/dropdown-menu';
 import { provideIcons } from '@ng-icons/core';
@@ -32,13 +32,13 @@ import { HlmIconImports } from '@spartan-ng/helm/icon';
   `,
 })
 export class LanguageSwitcherComponent {
-  constructor(public langService: LanguageService) {}
+  readonly store = inject(LanguageStore);
 
   get currentLang() {
-    return this.langService.getCurrentLang();
+    return this.store.currentLang();
   }
 
   switchLang(lang: string) {
-    this.langService.setLanguage(lang);
+    this.store.setLanguage(lang);
   }
 }

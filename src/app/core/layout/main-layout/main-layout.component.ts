@@ -1,6 +1,6 @@
 import { Component, inject } from '@angular/core';
 import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
-import { AsyncPipe } from '@angular/common';
+
 import { provideIcons } from '@ng-icons/core';
 import {
   lucideLayoutDashboard,
@@ -18,7 +18,7 @@ import { BrnNavigationMenuImports } from '@spartan-ng/brain/navigation-menu';
 import { HlmNavigationMenuImports } from '@spartan-ng/helm/navigation-menu';
 import { HlmIconImports } from '@spartan-ng/helm/icon';
 import { HlmButton } from '@spartan-ng/helm/button';
-import { ThemeService } from '../../theme/theme.service';
+import { ThemeStore } from '../../theme/theme.service';
 
 @Component({
   selector: 'app-main-layout',
@@ -27,7 +27,7 @@ import { ThemeService } from '../../theme/theme.service';
     RouterOutlet,
     RouterLink,
     RouterLinkActive,
-    AsyncPipe,
+
     ...HlmNavigationMenuImports,
     ...BrnNavigationMenuImports,
     ...HlmIconImports,
@@ -50,10 +50,10 @@ import { ThemeService } from '../../theme/theme.service';
   templateUrl: './main-layout.component.html',
 })
 export class MainLayoutComponent {
-  private _themeService = inject(ThemeService);
-  public theme$ = this._themeService.theme$;
+  private _themeStore = inject(ThemeStore);
+  public theme = this._themeStore.theme;
 
   public toggleTheme(): void {
-    this._themeService.toggleDarkMode();
+    this._themeStore.toggleTheme();
   }
 }

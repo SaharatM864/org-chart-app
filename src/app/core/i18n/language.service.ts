@@ -1,49 +1,54 @@
-import { Injectable, Inject, Renderer2, RendererFactory2, PLATFORM_ID } from '@angular/core';
-// eslint-disable-next-line @nx/enforce-module-boundaries
-import { TranslateService } from '@ngx-translate/core';
 import { DOCUMENT, isPlatformBrowser } from '@angular/common';
+import { inject, PLATFORM_ID, RendererFactory2 } from '@angular/core';
+import { patchState, signalStore, withHooks, withMethods, withState } from '@ngrx/signals';
+import { TranslateService } from '@ngx-translate/core';
 
-@Injectable({
-  providedIn: 'root',
-})
-export class LanguageService {
-  private renderer: Renderer2;
-  private currentLang = 'en';
-
-  constructor(
-    private translate: TranslateService,
-    rendererFactory: RendererFactory2,
-    @Inject(DOCUMENT) private document: Document,
-    @Inject(PLATFORM_ID) private platformId: object,
-  ) {
-    this.renderer = rendererFactory.createRenderer(null, null);
-    this.initLanguage();
-  }
-
-  private initLanguage() {
-    let savedLang = 'en';
-    if (isPlatformBrowser(this.platformId)) {
-      savedLang = localStorage.getItem('app-language') || 'en';
-    }
-    this.setLanguage(savedLang);
-  }
-
-  setLanguage(lang: string) {
-    this.currentLang = lang;
-    this.translate.use(lang);
-    if (isPlatformBrowser(this.platformId)) {
-      localStorage.setItem('app-language', lang);
-    }
-    this.updateBodyClass(lang);
-  }
-
-  getCurrentLang(): string {
-    return this.currentLang;
-  }
-
-  private updateBodyClass(lang: string) {
-    this.renderer.removeClass(this.document.body, 'lang-en');
-    this.renderer.removeClass(this.document.body, 'lang-th');
-    this.renderer.addClass(this.document.body, `lang-${lang}`);
-  }
+interface LanguageState {
+  currentLang: string;
 }
+
+const initialState: LanguageState = {
+  currentLang: 'en',
+};
+
+export const LanguageStore = signalStore(
+  { providedIn: 'root' },
+  withState(initialState),
+  withMethods((store) => {
+    const translate = inject(TranslateService);
+    const renderer = inject(RendererFactory2).createRenderer(null, null);
+    const document = inject(DOCUMENT);
+    const platformId = inject(PLATFORM_ID);
+
+    const updateBodyClass = (lang: string) => {
+      renderer.removeClass(document.body, 'lang-en');
+      renderer.removeClass(document.body, 'lang-th');
+      renderer.addClass(document.body, `lang-${lang}`);
+    };
+
+    return {
+      setLanguage: (lang: string) => {
+        patchState(store, { currentLang: lang });
+        translate.use(lang);
+        if (isPlatformBrowser(platformId)) {
+          localStorage.setItem('app-language', lang);
+        }
+        updateBodyClass(lang);
+      },
+      initLanguage: () => {
+        let savedLang = 'en';
+        if (isPlatformBrowser(platformId)) {
+          savedLang = localStorage.getItem('app-language') || 'en';
+        }
+        patchState(store, { currentLang: savedLang });
+        translate.use(savedLang);
+        updateBodyClass(savedLang);
+      },
+    };
+  }),
+  withHooks({
+    onInit: (store) => {
+      store.initLanguage();
+    },
+  }),
+);

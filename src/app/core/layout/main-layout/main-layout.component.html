@@ -20,7 +20,7 @@
 
       <div class="ml-auto flex items-center gap-2">
         <button hlmBtn variant="ghost" size="icon" (click)="toggleTheme()">
-          @if ((theme$ | async) === 'dark') {
+          @if (theme() === 'dark') {
             <ng-icon hlm name="lucideMoon" class="h-5 w-5" />
           } @else {
             <ng-icon hlm name="lucideSun" class="h-5 w-5" />
