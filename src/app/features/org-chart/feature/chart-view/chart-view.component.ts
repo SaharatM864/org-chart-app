@@ -163,6 +163,7 @@ import { ChartDragDropService } from './chart-drag-drop.service';
             [context]="{
               hasChildren: deleteDialogState.hasChildren,
               childrenCount: deleteDialogState.childrenCount,
+              hasParent: deleteDialogState.hasParent,
             }"
             (onAction)="onDeleteAction($event)"
           ></app-confirm-delete-dialog>
@@ -250,6 +251,7 @@ export class ChartViewComponent {
     nodeId: null as string | null,
     hasChildren: false,
     childrenCount: 0,
+    hasParent: false,
   };
 
   selectedPositionItem: PositionItem | null = null;
@@ -492,6 +494,7 @@ export class ChartViewComponent {
       nodeId: nodeId,
       hasChildren: node.childrenIds.length > 0,
       childrenCount: node.childrenIds.length,
+      hasParent: !!node.parentId,
     };
   }
 
@@ -513,6 +516,7 @@ export class ChartViewComponent {
       nodeId: null,
       hasChildren: false,
       childrenCount: 0,
+      hasParent: false,
     };
   }
 

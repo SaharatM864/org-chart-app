@@ -35,7 +35,13 @@ import { NgIconComponent } from '@ng-icons/core';
             <button hlmBtn variant="outline" class="flex-1" (click)="onAction.emit('cascade')">
               Delete All Children
             </button>
-            <button hlmBtn variant="outline" class="flex-1" (click)="onAction.emit('reparent')">
+            <button
+              *ngIf="context.hasParent"
+              hlmBtn
+              variant="outline"
+              class="flex-1"
+              (click)="onAction.emit('reparent')"
+            >
               Move to Grandparent
             </button>
           </div>
@@ -61,9 +67,10 @@ import { NgIconComponent } from '@ng-icons/core';
   `,
 })
 export class ConfirmDeleteDialogComponent {
-  @Input() context: { hasChildren: boolean; childrenCount: number } = {
+  @Input() context: { hasChildren: boolean; childrenCount: number; hasParent: boolean } = {
     hasChildren: false,
     childrenCount: 0,
+    hasParent: false,
   };
   @Output() onAction = new EventEmitter<'delete' | 'cascade' | 'reparent' | null>();
 }
