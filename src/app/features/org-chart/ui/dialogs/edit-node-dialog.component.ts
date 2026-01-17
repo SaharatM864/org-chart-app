@@ -11,6 +11,8 @@ import {
 import { HlmInput } from '@spartan-ng/helm/input';
 import { HlmButton } from '@spartan-ng/helm/button';
 import { HlmLabel } from '@spartan-ng/helm/label';
+import { BrnSelectImports } from '@spartan-ng/brain/select';
+import { HlmSelectImports } from '@spartan-ng/helm/select';
 import { PositionFormData, WorkerNode } from '../../data-access/org.model';
 
 @Component({
@@ -27,6 +29,8 @@ import { PositionFormData, WorkerNode } from '../../data-access/org.model';
     HlmInput,
     HlmButton,
     HlmLabel,
+    BrnSelectImports,
+    HlmSelectImports,
   ],
   template: `
     <hlm-dialog-content class="sm:max-w-125">
@@ -63,16 +67,20 @@ import { PositionFormData, WorkerNode } from '../../data-access/org.model';
           </div>
           <div class="grid gap-2">
             <label hlmLabel for="salaryType">Salary Type</label>
-            <select
-              hlmInput
+            <brn-select
               id="salaryType"
               formControlName="salaryType"
-              class="h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+              placeholder="Select salary type"
             >
-              <option value="Normal">Normal</option>
-              <option value="Management">Management</option>
-              <option value="Admin">Admin</option>
-            </select>
+              <hlm-select-trigger class="w-full">
+                <hlm-select-value />
+              </hlm-select-trigger>
+              <hlm-select-content class="bg-white dark:bg-zinc-950">
+                <hlm-option value="Normal">Normal</hlm-option>
+                <hlm-option value="Management">Management</hlm-option>
+                <hlm-option value="Admin">Admin</hlm-option>
+              </hlm-select-content>
+            </brn-select>
           </div>
         </div>
 
