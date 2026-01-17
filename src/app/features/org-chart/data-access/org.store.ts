@@ -3,6 +3,7 @@ import { patchState, signalStore, withComputed, withMethods, withState } from '@
 import { v4 as uuidv4 } from 'uuid';
 import { MoveNodePayload, OrgState, PositionItem, WorkerNode } from './org.model';
 import { OrgService } from './org.service';
+import { OrgLogicHelper } from './org-logic.helper';
 
 const initialState: OrgState = {
   nodeMap: {},
@@ -311,61 +312,8 @@ export const OrgStore = signalStore(
         const positions = state.sidebarPositions;
         if (positions.length === 0) return state;
 
-        const nodeMap: Record<string, WorkerNode> = {};
-        const rootIds: string[] = [];
-
-        // 1. Create Root Node
-        const rootId = uuidv4();
-        const rootPos = positions[Math.floor(Math.random() * positions.length)];
-
-        nodeMap[rootId] = {
-          id: rootId,
-          name: rootPos.name,
-          nameTh: rootPos.nameTh,
-          nameZh: rootPos.nameZh,
-          nameVi: rootPos.nameVi,
-          parentId: null,
-          childrenIds: [],
-          level: 1,
-          isExpanded: true,
-          section: rootPos.code || 'General',
-          salaryType: 'Normal',
-        };
-        rootIds.push(rootId);
-
-        // 2. Generate Random Nodes (Total 20-100)
-        const totalNodes = Math.floor(Math.random() * 81) + 20; // 20 to 100
-        const allNodeIds = [rootId];
-
-        for (let i = 0; i < totalNodes - 1; i++) {
-          const newId = uuidv4();
-          const randomPos = positions[Math.floor(Math.random() * positions.length)];
-
-          // Pick a random parent from existing nodes
-          const parentId = allNodeIds[Math.floor(Math.random() * allNodeIds.length)];
-          const parent = nodeMap[parentId];
-
-          const newNode: WorkerNode = {
-            id: newId,
-            name: randomPos.name,
-            nameTh: randomPos.nameTh,
-            nameZh: randomPos.nameZh,
-            nameVi: randomPos.nameVi,
-            parentId: parentId,
-            childrenIds: [],
-            level: parent.level + 1,
-            isExpanded: true,
-            section: randomPos.code || 'General',
-            salaryType: 'Normal',
-          };
-
-          nodeMap[newId] = newNode;
-          nodeMap[parentId] = {
-            ...parent,
-            childrenIds: [...parent.childrenIds, newId],
-          };
-          allNodeIds.push(newId);
-        }
+        // Use helper to generate exactly 100 nodes
+        const { nodeMap, rootIds } = OrgLogicHelper.generateRandomChart(positions, 100);
 
         return { nodeMap, rootIds };
       });

@@ -53,7 +53,7 @@ import { WorkerNode } from '../../data-access/org.model';
             </hlm-select-trigger>
             <hlm-select-content class="bg-white dark:bg-zinc-950">
               <hlm-option *ngFor="let node of candidates" [value]="node.id">
-                {{ node.name }} ({{ node.section || 'General' }})
+                (Lvl {{ node.level }}) {{ node.name }} ({{ node.section || 'General' }})
               </hlm-option>
             </hlm-select-content>
           </brn-select>

@@ -4,7 +4,7 @@ import { v4 as uuidv4 } from 'uuid';
 export class OrgLogicHelper {
   static generateRandomChart(
     positions: PositionItem[],
-    count = 20,
+    count = 100,
   ): { nodeMap: Record<string, WorkerNode>; rootIds: string[] } {
     if (positions.length === 0) {
       return { nodeMap: {}, rootIds: [] };
@@ -34,14 +34,18 @@ export class OrgLogicHelper {
     rootIds.push(rootId);
 
     const existingIds = [rootId];
+    // Track max children for each node to create a diverse but deep tree
+    const maxChildrenMap: Record<string, number> = {};
+    maxChildrenMap[rootId] = Math.floor(Math.random() * 3) + 1; // 1-3 children for root
 
     // 2. Generate Random Nodes
-    // Ensure we don't exceed 100 total nodes (including root)
-    const targetCount = Math.min(Math.max(count, 20), 100);
-
-    for (let i = 1; i < targetCount; i++) {
-      const parentId = existingIds[Math.floor(Math.random() * existingIds.length)];
+    // Start from 1 because we already created the root
+    for (let i = 1; i < count; i++) {
+      // Pick a random parent from existing nodes
+      const parentIndex = Math.floor(Math.random() * existingIds.length);
+      const parentId = existingIds[parentIndex];
       const parent = nodeMap[parentId];
+
       const pos = positions[Math.floor(Math.random() * positions.length)];
       const newNodeId = uuidv4();
 
@@ -61,12 +65,20 @@ export class OrgLogicHelper {
 
       nodeMap[newNodeId] = newNode;
       existingIds.push(newNodeId);
+      // Assign random max children for this new node (1-3) to keep it deep
+      maxChildrenMap[newNodeId] = Math.floor(Math.random() * 3) + 1;
 
       // Update parent
+      const updatedChildren = [...parent.childrenIds, newNodeId];
       nodeMap[parentId] = {
         ...parent,
-        childrenIds: [...parent.childrenIds, newNodeId],
+        childrenIds: updatedChildren,
       };
+
+      // If parent reached its max children, remove from pool to force depth
+      if (updatedChildren.length >= (maxChildrenMap[parentId] || 2)) {
+        existingIds.splice(parentIndex, 1);
+      }
     }
 
     return { nodeMap, rootIds };
