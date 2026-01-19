@@ -12,12 +12,13 @@ import { WorkerNode } from '../../data-access/org.model';
   providers: [provideIcons({ lucideTrash2, lucideUser })],
   template: `
     <!-- 
-      NOTE: manually applying card styles instead of using hlmCard directive 
-      to prevent background color override issues during state changes (hover/highlight).
-      Using bg-white/95 explicitly ensures stable background color.
+      NOTE: The 'id' attribute with 'node-' prefix is CRITICAL for touch drag & drop navigation.
+      The library's internal logic expects this specific format to resolve the target node during touch events.
+      Do not remove or change this.
     -->
     <div
       class="node-content group relative flex w-56 flex-col overflow-hidden rounded-xl border border-border bg-card p-4 text-card-foreground shadow-sm backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl dark:border-border/50 dark:shadow-none dark:hover:border-primary/50"
+      [id]="'node-' + node.id"
       [class.ring-2]="!!highlightType"
       [class.ring-primary]="highlightType === 'current'"
       [class.ring-green-500]="highlightType === 'parent'"

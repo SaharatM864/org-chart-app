@@ -66,6 +66,7 @@ import { ChartDragDropService } from './chart-drag-drop.service';
         style="--chart-bg: var(--muted);"
         id="main-drop-zone"
         cdkDropList
+        [cdkDropListDisabled]="isInternalDrag"
         (cdkDropListDropped)="onBackgroundDrop($event)"
       >
         <div class="absolute top-4 right-4 z-10 flex flex-col gap-2">
@@ -92,7 +93,7 @@ import { ChartDragDropService } from './chart-drag-drop.service';
           <ng-container *ngIf="chartData() as rootNode; else noData">
             <ngx-interactive-org-chart
               #orgChart
-              class="block h-full w-full"
+              class="block h-full w-full touch-none"
               [data]="rootNode"
               [themeOptions]="themeOptions"
               [draggable]="isDraggable"
@@ -101,9 +102,15 @@ import { ChartDragDropService } from './chart-drag-drop.service';
               [miniMapPosition]="miniMapPosition"
               [miniMapWidth]="miniMapWidth"
               [miniMapHeight]="miniMapHeight"
+              [miniMapWidth]="miniMapWidth"
+              [miniMapHeight]="miniMapHeight"
               [canDragNode]="canDragNode"
               [canDropNode]="canDropNode"
+              [nodeClass]="'touch-none'"
+              (touchstart)="$event.stopPropagation()"
               (nodeDrop)="onNodeDrop($event)"
+              (nodeDragStart)="onNodeDragStart()"
+              (nodeDragEnd)="onNodeDragEnd()"
             >
               <ng-template #nodeTemplate let-node>
                 <app-node-card
@@ -250,6 +257,7 @@ export class ChartViewComponent {
   moveNodeDialogState: 'open' | 'closed' = 'closed';
   resetDialogState: 'open' | 'closed' = 'closed';
   isSidebarOpen = true;
+  isInternalDrag = false;
 
   deleteDialogState = {
     isOpen: false,
@@ -628,5 +636,15 @@ export class ChartViewComponent {
   onConfirmReset() {
     this.store.generateRandomChart();
     this.closeResetDialog();
+  }
+
+  // NOTE: When dragging internal nodes, we MUST disable the outer CDK DropList.
+  // Otherwise, CDK will capture the 'touchend' event, preventing the library from detecting the drop logic.
+  onNodeDragStart() {
+    this.isInternalDrag = true;
+  }
+
+  onNodeDragEnd() {
+    this.isInternalDrag = false;
   }
 }
