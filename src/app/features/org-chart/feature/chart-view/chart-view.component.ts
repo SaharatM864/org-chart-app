@@ -130,16 +130,21 @@ import { ChartDragDropService } from './chart-drag-drop.service';
         </ng-template>
       </main>
 
+      <!-- Mobile Sidebar Backdrop -->
       <div
-        class="fixed inset-y-0 right-0 z-50 bg-background transition-all duration-300 ease-in-out lg:static lg:z-auto lg:overflow-hidden"
+        *ngIf="isSidebarOpen"
+        class="fixed inset-0 z-90 bg-black/20 backdrop-blur-sm lg:hidden"
+        (click)="closeSidebar()"
+      ></div>
+
+      <!-- Sidebar Container -->
+      <div
+        class="fixed inset-y-0 right-0 z-100 bg-background shadow-2xl transition-all duration-300 ease-in-out lg:static lg:z-auto lg:h-auto lg:translate-x-0 lg:overflow-hidden lg:shadow-none"
         [class.translate-x-full]="!isSidebarOpen"
         [class.translate-x-0]="isSidebarOpen"
-        [class.lg:translate-x-0]="true"
         [class.lg:w-0]="!isSidebarOpen"
         [class.lg:w-80]="isSidebarOpen"
         [class.w-80]="true"
-        [class.shadow-xl]="isSidebarOpen"
-        [class.lg:shadow-none]="true"
       >
         <app-position-sidebar-skeleton *ngIf="store.isLoading(); else sidebar" />
         <ng-template #sidebar>

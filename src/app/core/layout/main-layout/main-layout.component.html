@@ -1,5 +1,5 @@
 <div class="flex h-screen w-screen flex-col overflow-hidden bg-background">
-  <header class="fixed top-0 z-50 w-full border-b border-border bg-background/80 backdrop-blur-md">
+  <header class="z-50 w-full shrink-0 border-b border-border bg-background/80 backdrop-blur-md">
     <div class="flex h-14 w-full items-center px-4">
       <nav hlmNavigationMenu class="mx-6 flex items-center space-x-4 lg:space-x-6">
         <ul hlmNavigationMenuList class="flex-row">
@@ -37,7 +37,7 @@
     </div>
   </header>
 
-  <main class="flex-1 pt-14">
+  <main class="relative flex-1 overflow-hidden">
     <router-outlet />
   </main>
 </div>
