@@ -131,7 +131,7 @@ body {
 }
 
 .cdk-drag-preview {
-  @apply box-border cursor-grabbing rounded-lg border-2 border-brand-primary bg-white opacity-90 shadow-2xl;
+  @apply box-border cursor-grabbing overflow-hidden rounded-lg border-2 border-brand-primary bg-white opacity-90 shadow-2xl;
 }
 
 .cdk-drag-placeholder {
