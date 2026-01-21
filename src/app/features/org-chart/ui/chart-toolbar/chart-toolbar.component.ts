@@ -117,10 +117,9 @@ import {
           [hideDelay]="200"
           [exitAnimationDuration]="300"
           hlmBtn
-          variant="ghost"
+          [variant]="isDraggable ? 'secondary' : 'destructive'"
           size="icon"
           (click)="toggleDragAndDrop.emit()"
-          [class.bg-accent]="isDraggable"
         >
           <ng-icon name="lucideMove" size="18"></ng-icon>
         </button>
