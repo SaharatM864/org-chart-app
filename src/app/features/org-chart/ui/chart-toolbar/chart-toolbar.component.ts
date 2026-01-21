@@ -36,9 +36,13 @@ import {
     }),
   ],
   template: `
-    <div class="glass-panel flex flex-col gap-1 rounded-lg border border-border/50 p-1 shadow-sm">
+    <div
+      id="chart-toolbar"
+      class="glass-panel flex flex-col gap-1 rounded-lg border border-border/50 p-1 shadow-sm"
+    >
       <hlm-tooltip class="block">
         <button
+          id="toolbar-toggle-sidebar"
           hlmTooltipTrigger
           position="left"
           [showDelay]="300"
@@ -58,6 +62,7 @@ import {
 
       <hlm-tooltip class="block">
         <button
+          id="toolbar-zoom-in"
           hlmTooltipTrigger
           position="left"
           [showDelay]="300"
@@ -75,6 +80,7 @@ import {
 
       <hlm-tooltip class="block">
         <button
+          id="toolbar-zoom-out"
           hlmTooltipTrigger
           position="left"
           [showDelay]="300"
@@ -92,6 +98,7 @@ import {
 
       <hlm-tooltip class="block">
         <button
+          id="toolbar-reset-view"
           hlmTooltipTrigger
           position="left"
           [showDelay]="300"
@@ -111,6 +118,7 @@ import {
 
       <hlm-tooltip class="block">
         <button
+          id="toolbar-drag-toggle"
           hlmTooltipTrigger
           position="left"
           [showDelay]="300"
@@ -132,6 +140,7 @@ import {
 
       <hlm-tooltip class="block">
         <button
+          id="toolbar-layout-switch"
           hlmTooltipTrigger
           position="left"
           [showDelay]="300"
@@ -153,6 +162,7 @@ import {
 
       <hlm-tooltip class="block">
         <button
+          id="toolbar-minimap"
           hlmTooltipTrigger
           position="left"
           [showDelay]="300"
@@ -173,6 +183,7 @@ import {
 
       <hlm-tooltip class="block">
         <button
+          id="toolbar-expand-collapse"
           hlmTooltipTrigger
           position="left"
           [showDelay]="300"
@@ -197,6 +208,7 @@ import {
 
       <hlm-tooltip class="block">
         <button
+          id="toolbar-generate-random"
           hlmTooltipTrigger
           position="left"
           [showDelay]="300"

@@ -1,5 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;700&display=swap');
 @import 'tailwindcss';
+@import 'driver.js/dist/driver.css';
 /* CRITICAL: Forces class-based dark mode strategy. DO NOT DELETE. Fixes forced dark mode on system preference. */
 @custom-variant dark (&:where(.dark, .dark *));
 @source '../libs';
@@ -165,4 +166,48 @@ body {
 
 .dark .glass-panel {
   background: rgba(30, 30, 30, 0.7);
+}
+
+/* Driver.js Overrides for Spartan UI Integration */
+.driver-popover {
+  @apply rounded-lg border border-border bg-popover p-4 text-popover-foreground shadow-md outline-none;
+  max-width: 300px !important;
+}
+
+.driver-popover-title {
+  @apply mb-2 text-lg leading-none font-semibold tracking-tight;
+}
+
+.driver-popover-description {
+  @apply mb-4 text-sm text-muted-foreground;
+}
+
+.driver-popover-footer {
+  @apply mt-2 flex items-center justify-end gap-2;
+}
+
+.driver-popover-footer button {
+  @apply inline-flex h-9 items-center justify-center rounded-md px-4 py-2 text-sm font-medium transition-colors focus-visible:outline-none;
+  text-shadow: none !important;
+}
+
+/* Next / Done Buttons (Primary) */
+.driver-popover-next-btn,
+.driver-popover-done-btn {
+  @apply bg-primary text-primary-foreground shadow hover:bg-primary/90;
+}
+
+/* Previous Button (Outline/Ghost) */
+.driver-popover-prev-btn {
+  @apply border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground;
+}
+
+/* Close Button */
+.driver-popover-close-btn {
+  @apply text-muted-foreground hover:text-foreground;
+}
+
+/* Progress Text */
+.driver-popover-progress-text {
+  @apply text-xs text-muted-foreground;
 }

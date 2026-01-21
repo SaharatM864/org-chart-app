@@ -37,7 +37,7 @@ import { WorkerNode } from '../../data-access/org.model';
         hlmBtn
         variant="ghost"
         size="icon"
-        class="absolute top-2 right-2 h-7 w-7 opacity-0 transition-opacity duration-200 group-hover:opacity-100 hover:bg-destructive/10 hover:text-destructive"
+        class="tour-node-delete-btn absolute top-2 right-2 h-7 w-7 opacity-0 transition-opacity duration-200 group-hover:opacity-100 hover:bg-destructive/10 hover:text-destructive"
         (click)="onDelete($event)"
         (mouseenter)="onMouseEnter()"
         (mouseleave)="onMouseLeave()"

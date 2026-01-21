@@ -14,6 +14,7 @@ import { PositionItemComponent } from '../position-item/position-item.component'
   providers: [provideIcons({ lucideLayoutGrid, lucidePlus, lucideX })],
   template: `
     <aside
+      id="position-sidebar"
       class="flex h-full w-80 flex-col gap-4 overflow-y-auto border-l border-border bg-background p-4 shadow-xl"
     >
       <div class="flex items-center justify-between">
@@ -22,7 +23,13 @@ import { PositionItemComponent } from '../position-item/position-item.component'
           Positions
         </h2>
         <div class="flex items-center gap-2">
-          <button hlmBtn variant="outline" size="sm" (click)="addPosition.emit()">
+          <button
+            id="sidebar-add-btn"
+            hlmBtn
+            variant="outline"
+            size="sm"
+            (click)="addPosition.emit()"
+          >
             <ng-icon name="lucidePlus" size="16"></ng-icon>
           </button>
           <button hlmBtn variant="ghost" size="sm" (click)="close.emit()">

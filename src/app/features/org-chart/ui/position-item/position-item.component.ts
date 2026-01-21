@@ -28,7 +28,7 @@ import { lucideGripVertical, lucidePencil } from '@ng-icons/lucide';
         <ng-icon
           cdkDragHandle
           name="lucideGripVertical"
-          class="cursor-grab text-muted-foreground active:cursor-grabbing"
+          class="tour-drag-handle cursor-grab text-muted-foreground active:cursor-grabbing"
         ></ng-icon>
         <div class="flex flex-col">
           <span class="text-sm font-medium text-foreground">{{ item.name }}</span>
@@ -40,7 +40,7 @@ import { lucideGripVertical, lucidePencil } from '@ng-icons/lucide';
         hlmBtn
         variant="ghost"
         size="icon"
-        class="h-8 w-8"
+        class="tour-edit-position-btn h-8 w-8"
         (mousedown)="$event.stopPropagation()"
         (click)="onEdit($event)"
       >

@@ -19,7 +19,10 @@
       </nav>
 
       <div class="ml-auto flex items-center gap-2">
-        <button hlmBtn variant="ghost" size="icon" (click)="toggleTheme()">
+        <button hlmBtn variant="ghost" size="icon" (click)="startTour()">
+          <ng-icon hlm name="lucideHelpCircle" class="h-5 w-5" />
+        </button>
+        <button id="theme-toggle-btn" hlmBtn variant="ghost" size="icon" (click)="toggleTheme()">
           @if (theme() === 'dark') {
             <ng-icon hlm name="lucideMoon" class="h-5 w-5" />
           } @else {

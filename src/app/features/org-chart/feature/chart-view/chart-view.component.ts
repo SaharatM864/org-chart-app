@@ -35,6 +35,8 @@ import { EditPositionDialogComponent } from '../../ui/dialogs/edit-position-dial
 import { ThemeStore } from '../../../../core/theme/theme.service';
 import { ChartDragDropService } from './chart-drag-drop.service';
 
+import { TourService } from '../../../../core/tour/tour.service';
+
 @Component({
   selector: 'app-chart-view',
   standalone: true,
@@ -246,6 +248,7 @@ import { ChartDragDropService } from './chart-drag-drop.service';
 export class ChartViewComponent {
   readonly store = inject(OrgStore);
   private readonly _dragDropService = inject(ChartDragDropService);
+  private readonly _tourService = inject(TourService);
   private readonly _elementRef = inject(ElementRef);
   private readonly _themeStore = inject(ThemeStore);
   private readonly _theme = this._themeStore.theme;
@@ -347,6 +350,8 @@ export class ChartViewComponent {
 
   ngOnInit() {
     this.store.loadChart();
+
+    this._tourService.activateTour('chart-view');
   }
 
   canDragNode = () => true;

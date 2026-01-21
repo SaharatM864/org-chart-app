@@ -1,5 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { TourService } from '../../core/tour/tour.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -8,9 +9,12 @@ import { CommonModule } from '@angular/common';
   template: `
     <div class="container px-4 pt-20 pb-6">
       <div class="space-y-4">
-        <h1 class="text-3xl font-bold tracking-tight">Dashboard</h1>
+        <div class="flex items-center justify-between">
+          <h1 id="dashboard-title" class="text-3xl font-bold tracking-tight">Dashboard</h1>
+        </div>
         <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           <div
+            id="stat-card-total"
             class="rounded-xl border bg-card p-6 text-card-foreground shadow-sm dark:shadow-none"
           >
             <div class="text-sm font-medium text-muted-foreground">Total Employees</div>
@@ -38,6 +42,7 @@ import { CommonModule } from '@angular/common';
         </div>
 
         <div
+          id="chart-overview"
           class="flex min-h-100 items-center justify-center rounded-xl border border-dashed bg-muted/50"
         >
           <div class="text-muted-foreground">Chart Overview Placeholder</div>
@@ -46,4 +51,10 @@ import { CommonModule } from '@angular/common';
     </div>
   `,
 })
-export class DashboardComponent {}
+export class DashboardComponent {
+  private tourService = inject(TourService);
+
+  ngOnInit() {
+    this.tourService.activateTour('dashboard');
+  }
+}
