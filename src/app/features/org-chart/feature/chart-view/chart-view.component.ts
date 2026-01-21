@@ -1,4 +1,5 @@
 import { Component, computed, inject, ViewChild, effect, ElementRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 import { CommonModule } from '@angular/common';
 import { CdkDragDrop, CdkDragRelease, DragDropModule } from '@angular/cdk/drag-drop';
@@ -282,6 +283,34 @@ export class ChartViewComponent {
   @ViewChild('orgChart') orgChart?: NgxInteractiveOrgChart<OrgChartNode>;
 
   constructor() {
+    // Listen for tour preparation requests (e.g., before "Delete Node" step)
+    this._tourService.prepareStep$.pipe(takeUntilDestroyed()).subscribe((element) => {
+      if (element === '.tour-node-delete-btn') {
+        if (this.orgChart) {
+          // 1. Reset View (Base state)
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          (this.orgChart as any).resetPanAndZoom();
+
+          setTimeout(() => {
+            // 2. Zoom to Root Node (Center & Focus)
+            const rootIds = this.store.rootIds();
+            if (rootIds.length > 0 && this.orgChart) {
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              (this.orgChart as any).highlightNode(rootIds[0]);
+            }
+
+            // 3. Wait for animation then proceed to the step
+            setTimeout(() => {
+              this._tourService.moveNext();
+            }, 600);
+          }, 300);
+        } else {
+          // Fallback if chart not ready
+          this._tourService.moveNext();
+        }
+      }
+    });
+
     effect(() => {
       const map = this.store.highlightedIds();
       // Cleanup old highlights
