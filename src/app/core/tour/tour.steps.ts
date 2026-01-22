@@ -55,6 +55,15 @@ export const TOUR_STEPS: { [key: string]: DriveStep[] } = {
       },
     },
     {
+      element: '#sidebar-add-btn',
+      popover: {
+        title: 'Add Position',
+        description: 'Create a new position type by clicking this plus button.',
+        side: 'bottom',
+        align: 'center',
+      },
+    },
+    {
       element: '.tour-edit-position-btn',
       popover: {
         title: 'Edit Position',
